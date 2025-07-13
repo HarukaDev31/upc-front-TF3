@@ -1,225 +1,190 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-      <div class="container mx-auto px-4 py-4">
+  <div class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+    <!-- Header con información de la función -->
+    <div class="bg-black/20 backdrop-blur-sm border-b border-white/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <UButton 
-              to="/peliculas" 
-              variant="ghost" 
-              color="gray"
-              icon="heroicons:arrow-left"
-            >
-              Volver
-            </UButton>
-            <div>
-              <h1 class="text-2xl font-bold text-gray-900">Seleccionar Asientos</h1>
-              <p class="text-gray-600">{{ pelicula?.titulo }}</p>
-            </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">{{ pelicula?.titulo || 'Selección de Asientos' }}</h1>
+            <p class="text-gray-300 mt-1">{{ funcion?.fecha }} - {{ funcion?.hora }}</p>
+            <p class="text-gray-400 text-sm">Sala {{ funcion?.sala_id }}</p>
           </div>
           
-          <div class="text-right">
-            <div class="text-sm text-gray-600">Función</div>
-            <div class="font-semibold">{{ formatDateTime(funcion?.fecha_hora_inicio) }}</div>
+          <!-- Estado de conexión WebSocket -->
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <div 
+                :class="[
+                  'w-3 h-3 rounded-full',
+                  connectionStatus === 'connected' ? 'bg-green-500' : 
+                  connectionStatus === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'
+                ]"
+              ></div>
+              <span class="text-sm text-gray-300">
+                {{ 
+                  connectionStatus === 'connected' ? 'Conectado' :
+                  connectionStatus === 'connecting' ? 'Conectando...' : 'Desconectado'
+                }}
+              </span>
+            </div>
+            
+            <!-- Usuario actual -->
+            <div v-if="currentUser" class="flex items-center space-x-2">
+              <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                <span class="text-white text-sm font-medium">
+                  {{ currentUser.nombre.charAt(0) }}{{ currentUser.apellido.charAt(0) }}
+                </span>
+              </div>
+              <span class="text-gray-300 text-sm">{{ currentUser.nombre }} {{ currentUser.apellido }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </header>
-
-    <!-- Loading -->
-    <div v-if="loading" class="flex justify-center items-center min-h-96">
-      <UIcon name="heroicons:arrow-path" class="w-8 h-8 animate-spin text-purple-500" />
     </div>
 
-    <!-- Error -->
-    <div v-else-if="error" class="container mx-auto px-4 py-12 text-center">
-      <UIcon name="heroicons:exclamation-triangle" class="w-12 h-12 text-red-500 mx-auto mb-4" />
-      <p class="text-red-600 text-xl mb-4">{{ error }}</p>
-      <UButton @click="cargarAsientos" color="purple">
-        Reintentar
-      </UButton>
-    </div>
-
-    <!-- Contenido principal -->
-    <div v-else class="container mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Mapa de asientos -->
+        <!-- Panel de selección de asientos -->
         <div class="lg:col-span-2">
-          <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-bold text-gray-900">Sala {{ funcion?.sala?.nombre }}</h2>
-              <div class="flex items-center space-x-4">
-                <div class="text-sm text-gray-600">
-                  {{ estadisticas?.disponibles }} de {{ estadisticas?.total }} asientos disponibles
-                </div>
-                <!-- Indicador de WebSocket (deshabilitado temporalmente) -->
-                <!-- <div class="flex items-center space-x-2">
-                  <div 
-                    :class="{
-                      'bg-green-500': ws.isConnected.value,
-                      'bg-yellow-500': ws.isConnecting.value,
-                      'bg-red-500': !ws.isConnected.value && !ws.isConnecting.value
-                    }"
-                    class="w-2 h-2 rounded-full"
-                  ></div>
-                  <span class="text-xs text-gray-500">
-                    {{ ws.isConnected.value ? 'Conectado' : ws.isConnecting.value ? 'Conectando...' : 'Desconectado' }}
-                  </span>
-                </div> -->
-              </div>
-            </div>
-
-            <!-- Pantalla -->
-            <div class="mb-8 text-center">
-              <div class="bg-gray-200 rounded-lg py-4 px-8 mx-auto max-w-md">
-                <UIcon name="heroicons:tv" class="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p class="text-gray-600 font-medium">PANTALLA</p>
-              </div>
-            </div>
-
-            <!-- Mapa de asientos -->
+          <div class="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+            <h2 class="text-2xl font-bold text-white mb-6">Selecciona tus asientos</h2>
+            
+            <!-- Grid de asientos -->
             <div class="space-y-4">
-              <div 
-                v-for="(fila, letraFila) in mapaAsientos" 
-                :key="letraFila"
-                class="flex items-center space-x-2"
-              >
-                <!-- Letra de fila -->
-                <div class="w-8 h-8 flex items-center justify-center text-sm font-semibold text-gray-600">
-                  {{ letraFila }}
-                </div>
-                
-                <!-- Asientos de la fila -->
-                <div class="flex space-x-1">
-                  <button
-                    v-for="asiento in fila"
-                    :key="asiento.codigo"
-                    @click="seleccionarAsiento(asiento)"
-                    :disabled="!asiento.disponible"
-                    :class="{
-                      'bg-green-500 hover:bg-green-600 text-white': asiento.seleccionado,
-                      'bg-gray-300 text-gray-500 cursor-not-allowed': !asiento.disponible,
-                      'bg-white hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-300': asiento.disponible && !asiento.seleccionado,
-                      'border-purple-500': asiento.tipo === 'vip' && asiento.disponible && !asiento.seleccionado,
-                      'border-green-500': asiento.tipo === 'estandar' && asiento.disponible && !asiento.seleccionado
-                    }"
-                    class="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-medium transition-all duration-200 relative"
-                  >
-                    {{ asiento.codigo.replace(letraFila, '') }}
-                    
-                    <!-- Badge VIP -->
-                    <span 
-                      v-if="asiento.tipo === 'vip' && asiento.disponible"
-                      class="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full text-xs text-white flex items-center justify-center"
-                    >
-                      V
-                    </span>
-                  </button>
-                </div>
+              <!-- Pantalla -->
+              <div class="text-center mb-8">
+                <div class="w-full h-2 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full mx-auto max-w-md"></div>
+                <p class="text-gray-400 text-sm mt-2">PANTALLA</p>
               </div>
-            </div>
 
-            <!-- Leyenda -->
-            <div class="mt-8 pt-6 border-t border-gray-200">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Leyenda</h3>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                             <!-- Asientos -->
+               <div class="grid grid-cols-10 gap-2 max-w-4xl mx-auto">
+                 <template v-for="fila in filas" :key="fila">
+                   <div class="text-center text-gray-400 text-sm font-medium py-2">{{ fila }}</div>
+                   <template v-for="columna in columnas" :key="`${fila}${columna}`">
+                     <button
+                       @click="toggleSeat(`${fila}${columna}`)"
+                       :disabled="!isSeatAvailable(`${fila}${columna}`) && !isSeatSelectedByMe(`${fila}${columna}`)"
+                       :class="[
+                         'w-12 h-12 rounded-lg border-2 transition-all duration-200 font-medium text-sm',
+                         getSeatClasses(`${fila}${columna}`)
+                       ]"
+                     >
+                       {{ columna }}
+                     </button>
+                   </template>
+                 </template>
+               </div>
+
+              <!-- Leyenda -->
+              <div class="flex flex-wrap justify-center gap-4 mt-8">
                 <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 bg-white border-2 border-gray-200 rounded"></div>
-                  <span class="text-sm text-gray-600">Disponible</span>
+                  <div class="w-6 h-6 bg-gray-600 rounded border-2 border-gray-500"></div>
+                  <span class="text-gray-300 text-sm">Disponible</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 bg-green-500 rounded"></div>
-                  <span class="text-sm text-gray-600">Seleccionado</span>
+                  <div class="w-6 h-6 bg-purple-600 rounded border-2 border-purple-500"></div>
+                  <span class="text-gray-300 text-sm">Seleccionado</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 bg-gray-300 rounded"></div>
-                  <span class="text-sm text-gray-600">Ocupado</span>
+                  <div class="w-6 h-6 bg-red-600 rounded border-2 border-red-500"></div>
+                  <span class="text-gray-300 text-sm">Ocupado</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                  <div class="w-6 h-6 bg-white border-2 border-purple-500 rounded relative">
-                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full"></span>
-                  </div>
-                  <span class="text-sm text-gray-600">VIP</span>
+                  <div class="w-6 h-6 bg-green-600 rounded border-2 border-green-500"></div>
+                  <span class="text-gray-300 text-sm">Confirmado</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Panel de resumen -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-xl shadow-lg p-6 sticky top-8">
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Resumen de Compra</h3>
+        <!-- Panel lateral -->
+        <div class="space-y-6">
+          <!-- Resumen de selección -->
+          <div class="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+            <h3 class="text-xl font-bold text-white mb-4">Mis Asientos Seleccionados</h3>
             
-            <!-- Asientos seleccionados -->
-            <div v-if="asientosSeleccionados.length > 0" class="mb-6">
-              <h4 class="font-semibold text-gray-900 mb-3">Asientos Seleccionados</h4>
-              <div class="space-y-2">
-                <div 
-                  v-for="asiento in asientosSeleccionados" 
-                  :key="asiento.codigo"
-                  class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <div class="flex items-center space-x-3">
-                    <div 
-                      :class="{
-                        'bg-purple-500': asiento.tipo === 'vip',
-                        'bg-green-500': asiento.tipo === 'estandar'
-                      }"
-                      class="w-4 h-4 rounded-full"
-                    ></div>
-                    <span class="font-medium">{{ asiento.codigo }}</span>
-                    <span class="text-sm text-gray-600 capitalize">{{ asiento.tipo }}</span>
+            <div v-if="selectedSeatsArray.length === 0" class="text-gray-400 text-center py-8">
+              <svg class="w-12 h-12 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <p>No has seleccionado asientos aún</p>
+            </div>
+            
+            <div v-else class="space-y-3">
+              <div 
+                v-for="asiento in selectedSeatsArray" 
+                :key="asiento"
+                class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
+              >
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 bg-purple-600 rounded flex items-center justify-center">
+                    <span class="text-white text-sm font-medium">{{ asiento }}</span>
                   </div>
-                  <span class="font-semibold text-purple-600">${{ formatPrice(asiento.precio) }}</span>
+                  <div>
+                    <p class="text-white font-medium">Asiento {{ asiento }}</p>
+                    <p class="text-gray-400 text-sm">Temporal</p>
+                  </div>
                 </div>
+                <button
+                  @click="deselectSeat(asiento)"
+                  class="text-red-400 hover:text-red-300 transition-colors"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
 
-            <!-- Total -->
-            <div class="border-t pt-4">
-              <div class="flex justify-between items-center mb-4">
-                <span class="text-lg font-semibold text-gray-900">Total</span>
-                <span class="text-2xl font-bold text-purple-600">${{ formatPrice(totalCompra) }}</span>
+            <!-- Botón de continuar -->
+            <button
+              v-if="selectedSeatsArray.length > 0"
+              @click="continuarCompra"
+              class="w-full mt-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200"
+            >
+              Continuar con la compra
+            </button>
+          </div>
+
+          <!-- Información de la función -->
+          <div class="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+            <h3 class="text-xl font-bold text-white mb-4">Información</h3>
+            
+            <div class="space-y-4">
+              <div>
+                <p class="text-gray-400 text-sm">Película</p>
+                <p class="text-white font-medium">{{ pelicula?.titulo }}</p>
               </div>
               
-              <UButton 
-                @click="procederCompra"
-                :disabled="asientosSeleccionados.length === 0"
-                color="purple"
-                size="lg"
-                class="w-full"
-              >
-                Proceder a Pagar ({{ asientosSeleccionados.length }} asiento{{ asientosSeleccionados.length !== 1 ? 's' : '' }})
-              </UButton>
-            </div>
-
-            <!-- Información de la función -->
-            <div class="mt-6 pt-6 border-t border-gray-200">
-              <h4 class="font-semibold text-gray-900 mb-3">Información de la Función</h4>
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Fecha:</span>
-                  <span class="font-medium">{{ formatDate(funcion?.fecha_hora_inicio) }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Hora:</span>
-                  <span class="font-medium">{{ formatTime(funcion?.fecha_hora_inicio) }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Sala:</span>
-                  <span class="font-medium">{{ funcion?.sala?.nombre }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Idioma:</span>
-                  <span class="font-medium">{{ funcion?.idioma_audio }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Subtítulos:</span>
-                  <span class="font-medium">{{ funcion?.subtitulos ? 'Sí' : 'No' }}</span>
-                </div>
+              <div>
+                <p class="text-gray-400 text-sm">Fecha y Hora</p>
+                <p class="text-white font-medium">{{ funcion?.fecha }} - {{ funcion?.hora }}</p>
               </div>
+              
+              <div>
+                <p class="text-gray-400 text-sm">Sala</p>
+                <p class="text-white font-medium">{{ funcion?.sala_id }}</p>
+              </div>
+              
+              <div>
+                <p class="text-gray-400 text-sm">Precio por asiento</p>
+                <p class="text-white font-medium">${{ funcion?.precio || '15.000' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Usuarios activos -->
+          <div class="bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 p-6">
+            <h3 class="text-xl font-bold text-white mb-4">Usuarios Activos</h3>
+            
+            <div class="space-y-2">
+              <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span class="text-gray-300 text-sm">{{ currentUser?.nombre }} {{ currentUser?.apellido }} (Tú)</span>
+              </div>
+              <!-- Aquí se mostrarían otros usuarios activos -->
             </div>
           </div>
         </div>
@@ -229,194 +194,125 @@
 </template>
 
 <script setup>
-import { useCineStore } from '~/stores/cine'
+definePageMeta({
+  middleware: 'auth'
+})
 
 const route = useRoute()
 const router = useRouter()
-const api = useApi()
-
-// Estado
-const loading = ref(true)
-const error = ref(null)
-const funcion = ref(null)
-const pelicula = ref(null)
-const mapaAsientos = ref({})
-const estadisticas = ref(null)
-const asientosSeleccionados = ref([])
-
-// Obtener ID de la función
 const funcionId = route.params.id
 
-// Cargar asientos
-const cargarAsientos = async () => {
-  loading.value = true
-  error.value = null
-  
-  try {
-    const response = await api.getAsientosFuncion(funcionId)
-    
-    if (response.funcion_id) {
-      // Cargar información de la función
-      await cargarInformacionFuncion()
-      
-      // Procesar mapa de asientos
-      mapaAsientos.value = response.mapa_asientos
-      estadisticas.value = response.estadisticas
-      
-      // Agregar estado de selección a cada asiento
-      Object.keys(mapaAsientos.value).forEach(letraFila => {
-        mapaAsientos.value[letraFila].forEach(asiento => {
-          asiento.seleccionado = false
-        })
-      })
-    } else {
-      error.value = 'No se pudo cargar la información de los asientos'
-    }
-  } catch (err) {
-    error.value = 'Error de conexión'
-    console.error('Error cargando asientos:', err)
-  } finally {
-    loading.value = false
-  }
-}
+// Composable de autenticación
+const { currentUser, isLoggedIn, loading: authLoading, checkAuth } = useAuth()
 
-// Cargar información de la función
-const cargarInformacionFuncion = async () => {
-  try {
-    // Aquí podrías hacer una llamada adicional para obtener la información de la función
-    // Por ahora, usaremos datos simulados
-    funcion.value = {
-      fecha_hora_inicio: '2024-12-20T15:30:00',
-      sala: {
-        nombre: 'Sala VIP'
-      },
-      idioma_audio: 'Español',
-      subtitulos: false
-    }
-  } catch (err) {
-    console.error('Error cargando información de función:', err)
-  }
-}
+// Composable de WebSocket
+const {
+  isConnected,
+  connectionStatus,
+  selectedSeats,
+  selectSeat,
+  deselectSeat,
+  getSeatStatus,
+  isSeatAvailable,
+  isSeatSelectedByMe,
+  onConnectionStatusChanged,
+  connect
+} = useWebSocket(funcionId)
 
-// Seleccionar asiento
-const seleccionarAsiento = (asiento) => {
-  if (!asiento.disponible) return
+// Datos de la función (simulados por ahora)
+const funcion = ref({
+  id: funcionId,
+  fecha: '2024-12-25',
+  hora: '20:00',
+  sala_id: 'Sala 1',
+  precio: '15.000'
+})
+
+const pelicula = ref({
+  titulo: 'Avengers: Endgame',
+  duracion: '181 min',
+  genero: 'Acción, Aventura'
+})
+
+// Configuración del grid de asientos
+const filas = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+const columnas = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+
+// Computed para obtener array de asientos seleccionados
+const selectedSeatsArray = computed(() => {
+  return Array.from(selectedSeats.value)
+})
+
+// Función para alternar selección de asiento
+const toggleSeat = async (asientoId) => {
+  console.log('=== TOGGLE SEAT ===')
+  console.log('Asiento ID:', asientoId)
+  console.log('¿Está seleccionado por mí?', isSeatSelectedByMe(asientoId))
+  console.log('¿Está disponible?', isSeatAvailable(asientoId))
   
-  if (asiento.seleccionado) {
-    // Deseleccionar
-    asiento.seleccionado = false
-    asientosSeleccionados.value = asientosSeleccionados.value.filter(a => a.codigo !== asiento.codigo)
+  if (isSeatSelectedByMe(asientoId)) {
+    console.log('Deseleccionando asiento:', asientoId)
+    await deselectSeat(asientoId)
+  } else if (isSeatAvailable(asientoId)) {
+    console.log('Seleccionando asiento:', asientoId)
+    await selectSeat(asientoId)
   } else {
-    // Seleccionar
-    asiento.seleccionado = true
-    asientosSeleccionados.value.push(asiento)
+    console.log('Asiento no disponible:', asientoId)
   }
 }
 
-// Calcular total de la compra
-const totalCompra = computed(() => {
-  return asientosSeleccionados.value.reduce((total, asiento) => total + asiento.precio, 0)
-})
-
-// Formatear fecha
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
-// Formatear fecha y hora
-const formatDateTime = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// Formatear hora
-const formatTime = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleTimeString('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// Formatear precio
-const formatPrice = (price) => {
-  if (!price) return '0'
-  return price.toLocaleString('es-CO')
-}
-
-// Proceder a la compra
-const procederCompra = () => {
-  if (asientosSeleccionados.value.length === 0) return
+// Función para obtener clases CSS del asiento
+const getSeatClasses = (asientoId) => {
+  const status = getSeatStatus(asientoId)
   
-  // Guardar en el store
-  const cineStore = useCineStore()
-  cineStore.setAsientosSeleccionados(asientosSeleccionados.value)
-  cineStore.setFuncionActual(funcion.value)
-  cineStore.setTotalCompra(totalCompra.value)
-  
-  // Navegar a la página de pago
-  router.push('/pago')
+  switch (status) {
+    case 'selected':
+      return 'bg-purple-600 border-purple-500 text-white hover:bg-purple-700'
+    case 'confirmed':
+      return 'bg-green-600 border-green-500 text-white'
+    case 'occupied':
+    case 'taken':
+      return 'bg-red-600 border-red-500 text-white cursor-not-allowed opacity-50'
+    default:
+      return 'bg-gray-600 border-gray-500 text-white hover:bg-gray-700 hover:border-gray-400'
+  }
 }
 
-// WebSocket para actualizaciones en tiempo real (deshabilitado temporalmente)
-// const ws = useWebSocket()
+// Función para continuar con la compra
+const continuarCompra = () => {
+  if (selectedSeatsArray.value.length > 0) {
+    // Guardar selecciones en localStorage para la página de compra
+    if (process.client) {
+      localStorage.setItem(`selecciones_${funcionId}`, JSON.stringify(selectedSeatsArray.value))
+    }
+    
+    // Redirigir a la página de compra
+    router.push(`/comprar?funcion=${funcionId}`)
+  }
+}
 
-// Conectar WebSocket al montar el componente
+// Verificar autenticación
 onMounted(async () => {
-  await cargarAsientos()
+  console.log('Página de asientos montada')
+  console.log('Estado de autenticación inicial:', isLoggedIn.value)
+  console.log('Usuario actual:', currentUser.value)
   
-  // TODO: Implementar WebSocket cuando esté disponible
-  // ws.connect()
+  // Verificar autenticación manualmente
+  const isAuthenticated = await checkAuth()
+  console.log('Resultado de checkAuth:', isAuthenticated)
   
-  // Suscribirse a actualizaciones de asientos
-  // if (funcionId) {
-  //   ws.subscribeToAsientos(funcionId, (data) => {
-  //     console.log('Actualización de asientos recibida:', data)
-  //     
-  //     // Actualizar el estado de los asientos en tiempo real
-  //     if (data.mapa_asientos) {
-  //       // Actualizar solo los asientos que cambiaron
-  //       Object.keys(data.mapa_asientos).forEach(letraFila => {
-  //         if (mapaAsientos.value[letraFila]) {
-  //           data.mapa_asientos[letraFila].forEach(asientoActualizado => {
-  //             const asientoExistente = mapaAsientos.value[letraFila].find(
-  //               a => a.codigo === asientoActualizado.codigo
-  //             )
-  //             if (asientoExistente) {
-  //               // Mantener el estado de selección si el asiento estaba seleccionado
-  //               const estabaSeleccionado = asientoExistente.seleccionado
-  //               Object.assign(asientoExistente, asientoActualizado)
-  //               asientoExistente.seleccionado = estabaSeleccionado
-  //             }
-  //           })
-  //         }
-  //       })
-  //     }
-  //     
-  //     // Actualizar estadísticas
-  //     if (data.estadisticas) {
-  //       estadisticas.value = data.estadisticas
-  //     }
-  //   })
-  // }
+  if (!isAuthenticated) {
+    console.log('Usuario no autenticado, redirigiendo a login')
+    router.push(`/auth/login?redirect=${route.fullPath}`)
+  } else {
+    console.log('Usuario autenticado correctamente')
+    // Conectar al WebSocket después de verificar autenticación
+    await connect()
+  }
 })
 
-// Limpiar al desmontar
-// onBeforeUnmount(() => {
-//   if (funcionId) {
-//     ws.unsubscribeFromAsientos(funcionId)
-//   }
-//   ws.disconnect()
-// })
+// Escuchar cambios en el estado de conexión
+onConnectionStatusChanged.value = (status) => {
+  console.log('Estado de conexión WebSocket:', status)
+}
 </script> 

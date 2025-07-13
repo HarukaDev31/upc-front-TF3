@@ -63,17 +63,17 @@
                 class="w-full h-80 object-cover"
               />
               <div class="absolute top-4 right-4 bg-purple-500 text-white px-2 py-1 rounded-full text-sm font-semibold">
-                {{ pelicula.rating }}/10
+                {{ pelicula.rating || '10' }}/10
               </div>
             </div>
             
             <div class="p-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">{{ pelicula.titulo }}</h3>
-              <p class="text-gray-600 mb-4 line-clamp-2">{{ pelicula.descripcion }}</p>
+              <p class="text-gray-600 mb-4 line-clamp-2">{{ pelicula.sinopsis || 'Sin descripción disponible' }}</p>
               
               <div class="flex items-center justify-between mb-4">
-                <span class="text-sm text-gray-500">{{ pelicula.genero }}</span>
-                <span class="text-sm text-gray-500">{{ pelicula.duracion }} min</span>
+                <span class="text-sm text-gray-500 bg-purple-100 px-2 py-1 rounded-full" v-for="genero in pelicula.generos" :key="genero">{{ genero }}</span>
+                <span class="text-sm text-gray-500">{{ pelicula.duracion_minutos || 'N/A' }} min</span>
               </div>
               
               <UButton 
@@ -193,12 +193,16 @@ const cargarPeliculasDestacadas = async () => {
   
   try {
     const response = await api.getPeliculas(8, 0)
-    console.log(response.success,response.peliculas)
-    if (response.peliculas) {
-      peliculasDestacadas.value = response.peliculas || []
-      setPeliculas(response.peliculas || [])
+
+    console.log('API Response:', response)
+    
+    if (response.success && response.data.peliculas) {
+      // La API devuelve directamente un array de películas
+      peliculasDestacadas.value = response.data.peliculas || []
+      setPeliculas(response.data.peliculas || [])
     } else {
       error.value = response.error || 'Error al cargar las películas'
+      console.error('Error en respuesta API:', response)
     }
   } catch (err) {
     error.value = 'Error de conexión'

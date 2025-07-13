@@ -6,13 +6,6 @@ export default defineNuxtConfig({
   // Configuración SSR/CSR
   ssr: false,
   
-  // Configuración del router
-  router: {
-    options: {
-      strict: false
-    }
-  },
-  
   // Módulos
   modules: [
     '@nuxt/ui',
@@ -27,9 +20,7 @@ export default defineNuxtConfig({
   },
   
   // Configuración de UI
-  ui: {
-    icons: ['heroicons', 'lucide']
-  },
+  ui: {},
   
   // Configuración de Tailwind
   tailwindcss: {
@@ -60,7 +51,8 @@ export default defineNuxtConfig({
   // Configuración de runtime
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:8000'
+      apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:8000',
+      websocketUrl: process.env.WEBSOCKET_URL || 'ws://localhost:8001'
     }
   },
   

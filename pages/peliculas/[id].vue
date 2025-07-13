@@ -82,23 +82,23 @@
                   <div class="space-y-3">
                     <div class="flex justify-between">
                       <span class="text-gray-600">Géneros:</span>
-                      <span class="font-medium">{{ pelicula.generos.join(', ') }}</span>
+                      <span class="font-medium text-purple-600">{{ pelicula.generos.join(', ') }}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-gray-600">Director:</span>
-                      <span class="font-medium">{{ pelicula.director }}</span>
+                      <span class="font-medium text-purple-600">{{ pelicula.director }}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-gray-600">Duración:</span>
-                      <span class="font-medium">{{ pelicula.duracion_minutos }} minutos</span>
+                      <span class="font-medium text-purple-600">{{ pelicula.duracion_minutos }} minutos</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-gray-600">Clasificación:</span>
-                      <span class="font-medium">{{ pelicula.clasificacion }}</span>
+                      <span class="font-medium text-purple-600">{{ pelicula.clasificacion }}</span>
                     </div>
                     <div class="flex justify-between">
                       <span class="text-gray-600">Fecha de estreno:</span>
-                      <span class="font-medium">{{ formatDate(pelicula.fecha_estreno) }}</span>
+                      <span class="font-medium text-purple-600">{{ formatDate(pelicula.fecha_estreno) }}</span>
                     </div>
                   </div>
                 </div>
@@ -172,15 +172,15 @@
                 <div class="space-y-3">
                   <div class="flex justify-between">
                     <span class="text-gray-600">Horario:</span>
-                    <span class="font-medium">{{ formatTime(funcion.fecha_hora_inicio) }} - {{ formatTime(funcion.fecha_hora_fin) }}</span>
+                    <span class="font-medium text-purple-600">{{ formatTime(funcion.fecha_hora_inicio) }} - {{ formatTime(funcion.fecha_hora_fin) }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600">Sala:</span>
-                    <span class="font-medium">{{ funcion.sala.nombre }} ({{ funcion.sala.tipo.toUpperCase() }})</span>
+                    <span class="font-medium text-purple-600">{{ funcion.sala.nombre }} ({{ funcion.sala.tipo.toUpperCase() }})</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600">Capacidad:</span>
-                    <span class="font-medium">{{ funcion.sala.capacidad_total }} asientos</span>
+                    <span class="font-medium text-purple-600">{{ funcion.sala.capacidad_total }} asientos</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600">Precio base:</span>
@@ -192,11 +192,11 @@
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600">Idioma:</span>
-                    <span class="font-medium">{{ funcion.idioma_audio }}</span>
+                    <span class="font-medium text-purple-600">{{ funcion.idioma_audio }}</span>
                   </div>
                   <div class="flex justify-between">
                     <span class="text-gray-600">Subtítulos:</span>
-                    <span class="font-medium">{{ funcion.subtitulos ? 'Sí' : 'No' }}</span>
+                    <span class="font-medium text-purple-600">{{ funcion.subtitulos ? 'Sí' : 'No' }}</span>
                   </div>
                 </div>
               </div>
@@ -285,9 +285,9 @@ const cargarDatos = async () => {
     // Cargar película y funciones usando el endpoint correcto
     const response = await api.getPeliculaConFunciones(peliculaId)
     
-    if (response.pelicula) {
-      pelicula.value = response.pelicula
-      funciones.value = response.funciones || []
+    if (response.success && response.data.pelicula) {
+      pelicula.value = response.data.pelicula
+      funciones.value = response.data.funciones || []
     } else {
       error.value = 'No se pudo cargar la información de la película'
     }

@@ -1,56 +1,36 @@
-# Cinemax - Sistema de Cine
+# 🎬 Sistema de Cine - Frontend
 
-Un sistema moderno de gestión de cine construido con **Nuxt 3**, **Tailwind CSS** y **Nuxt UI**. El sistema permite a los usuarios explorar películas, reservar asientos y completar compras de entradas de manera intuitiva.
+Sistema de reserva de asientos en tiempo real para un cine, desarrollado con **Nuxt 3** y **Vue 3**.
 
-## 🎬 Características
+## ✨ Características
 
-### Para Usuarios
-- **Exploración de Películas**: Catálogo completo con filtros por género, fecha y búsqueda
-- **Selección de Asientos**: Mapa interactivo de la sala con selección visual de asientos
-- **Proceso de Compra**: Formulario completo con múltiples métodos de pago
-- **Métricas en Tiempo Real**: Estadísticas de ocupación y rendimiento
-- **Diseño Responsivo**: Experiencia optimizada para móviles y desktop
+### 🔐 **Sistema de Autenticación**
+- Registro de usuarios con validación
+- Login con persistencia de sesión
+- Middleware de protección de rutas
+- Gestión de estado de autenticación
 
-### Para Administradores
-- **Dashboard de Métricas**: Análisis detallado de ventas y ocupación
-- **Ranking de Películas**: Estadísticas de rendimiento por película
-- **Gestión de Salas**: Monitoreo de ocupación en tiempo real
-- **Reportes**: Tendencias y análisis de comportamiento
+### 🪑 **Selección de Asientos en Tiem Real**
+- WebSocket para sincronización en tiempo real
+- Selección/deselección de asientos
+- Estados visuales: disponible, seleccionado, ocupado, confirmado
+- Persistencia de selecciones en el servidor
+- Reconexión automática del WebSocket
 
-## 🛠️ Tecnologías
+### 🎨 **Interfaz Moderna**
+- Diseño responsive con Tailwind CSS
+- Gradientes y efectos visuales atractivos
+- Componentes reutilizables
+- Experiencia de usuario optimizada
 
-- **Frontend**: Nuxt 3 (Vue 3 + TypeScript)
-- **UI Framework**: Nuxt UI + Tailwind CSS
-- **State Management**: Pinia
-- **Icons**: Heroicons
-- **Build Tool**: Vite
-
-## 📁 Estructura del Proyecto
-
-```
-upc-front-TF3/
-├── components/          # Componentes reutilizables
-├── composables/         # Composables de Vue (useApi, etc.)
-├── layouts/            # Layouts de la aplicación
-├── pages/              # Páginas de la aplicación
-│   ├── index.vue       # Página principal
-│   ├── peliculas/      # Gestión de películas
-│   ├── funciones/      # Selección de asientos
-│   ├── comprar.vue     # Proceso de compra
-│   └── metricas.vue    # Dashboard de métricas
-├── stores/             # Stores de Pinia
-├── types/              # Tipos TypeScript
-├── public/             # Archivos estáticos
-└── nuxt.config.ts      # Configuración de Nuxt
-```
-
-## 🚀 Instalación y Configuración
+## 🚀 Instalación
 
 ### Prerrequisitos
 - Node.js 18+ 
 - npm o yarn
+- Backend API corriendo en `http://localhost:8000`
 
-### Instalación
+### Pasos de instalación
 
 1. **Clonar el repositorio**
 ```bash
@@ -66,10 +46,14 @@ npm install
 3. **Configurar variables de entorno**
 ```bash
 # Crear archivo .env
-echo "API_BASE_URL=http://localhost:8000" > .env
+cp .env.example .env
+
+# Editar .env con las URLs correctas
+API_BASE_URL=http://localhost:8000
+WEBSOCKET_URL=ws://localhost:8000
 ```
 
-4. **Ejecutar en modo desarrollo**
+4. **Ejecutar en desarrollo**
 ```bash
 npm run dev
 ```
@@ -79,168 +63,177 @@ npm run dev
 http://localhost:3000
 ```
 
-## 📋 Endpoints de la API
+## 📁 Estructura del Proyecto
 
-El sistema está diseñado para trabajar con los siguientes endpoints:
+```
+upc-front-TF3/
+├── components/          # Componentes Vue reutilizables
+│   └── AppHeader.vue   # Header principal con navegación
+├── composables/         # Composables Vue 3
+│   ├── useAuth.ts      # Gestión de autenticación
+│   ├── useApi.ts       # Cliente HTTP para API
+│   └── useWebSocket.ts # Gestión de WebSocket
+├── layouts/            # Layouts de la aplicación
+│   ├── default.vue     # Layout principal
+│   └── auth.vue        # Layout para páginas de auth
+├── middleware/         # Middleware de rutas
+│   ├── auth.ts         # Protección de rutas autenticadas
+│   └── guest.ts        # Protección de rutas para invitados
+├── pages/             # Páginas de la aplicación
+│   ├── auth/          # Páginas de autenticación
+│   │   ├── login.vue  # Página de login
+│   │   └── register.vue # Página de registro
+│   └── funciones/     # Páginas de funciones
+│       └── [id]/
+│           └── asientos.vue # Selección de asientos
+├── stores/            # Stores de Pinia
+└── types/             # Definiciones de tipos TypeScript
+```
 
-### Endpoints Básicos
-- `GET /` - Bienvenida
-- `GET /health` - Health check
-
-### Gestión de Películas
-- `GET /api/v1/peliculas` - Listar películas
-- `GET /api/v1/peliculas/{id}/funciones` - Funciones de película
-- `POST /api/v1/buscar-peliculas` - Buscar películas
-
-### Gestión de Funciones
-- `GET /api/v1/funciones/{id}/asientos` - Asientos de función
-
-### Compra de Entradas
-- `POST /api/v1/comprar-entrada` - Comprar entrada
-
-### Métricas y Analytics
-- `GET /api/v1/metricas/ranking-peliculas` - Ranking de películas
-- `GET /api/v1/metricas/ocupacion/{id}` - Ocupación de sala
-
-## 🎨 Características del Diseño
-
-### Paleta de Colores
-- **Primario**: Purple (500-600)
-- **Secundario**: Pink (400-500)
-- **Acentos**: Green, Blue, Orange para métricas
-- **Neutros**: Gray (50-900)
-
-### Componentes UI
-- **Botones**: UButton con variantes y estados
-- **Formularios**: UInput, USelect, UFormGroup
-- **Modales**: UModal para confirmaciones
-- **Iconos**: Heroicons integrados
-- **Navegación**: Responsive con menú móvil
-
-### Responsive Design
-- **Mobile First**: Diseño optimizado para móviles
-- **Breakpoints**: sm, md, lg, xl
-- **Grid System**: CSS Grid y Flexbox
-- **Typography**: Escala tipográfica consistente
-
-## 🔧 Configuración Avanzada
+## 🔧 Configuración
 
 ### Variables de Entorno
+
 ```env
-# API Configuration
+# API Backend
 API_BASE_URL=http://localhost:8000
 
-# Build Configuration
-NODE_ENV=development
+# WebSocket
+WEBSOCKET_URL=ws://localhost:8000
 ```
 
 ### Configuración de Nuxt
-```typescript
-// nuxt.config.ts
-export default defineNuxtConfig({
-  ssr: false, // Client-side rendering
-  modules: [
-    '@nuxt/ui',
-    '@nuxtjs/tailwindcss',
-    '@pinia/nuxt',
-    '@vueuse/nuxt'
-  ],
-  // ... más configuración
-})
+
+El proyecto está configurado para:
+- **SSR deshabilitado** (CSR para mejor rendimiento)
+- **Tailwind CSS** para estilos
+- **Nuxt UI** para componentes
+- **Pinia** para gestión de estado
+- **VueUse** para utilidades
+
+## 🎯 Uso del Sistema
+
+### 1. **Registro/Login**
+- Navegar a `/auth/register` para crear cuenta
+- Navegar a `/auth/login` para iniciar sesión
+- Los datos se validan contra la API real
+
+### 2. **Selección de Asientos**
+- Navegar a `/funciones/[id]/asientos`
+- Seleccionar asientos haciendo clic
+- Ver estados en tiempo real
+- Continuar a la compra cuando esté listo
+
+### 3. **Estados de Asientos**
+- **Gris**: Disponible
+- **Morado**: Seleccionado por ti
+- **Rojo**: Ocupado por otro usuario
+- **Verde**: Confirmado
+
+## 🔌 Integración con API
+
+### Endpoints Utilizados
+
+#### Autenticación
+- `POST /api/v1/usuarios/registro` - Registro de usuario
+- `POST /api/v1/usuarios/login` - Login de usuario
+
+#### Selección de Asientos
+- `POST /api/v1/selecciones/` - Crear selección
+- `POST /api/v1/selecciones/{id}/cancelar` - Cancelar selección
+- `GET /api/v1/selecciones/funcion/{id}` - Obtener selecciones por función
+
+#### WebSocket
+- `ws://localhost:8000/ws/funciones/{funcion_id}/asientos`
+
+## 🛠️ Desarrollo
+
+### Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run dev
+
+# Build para producción
+npm run build
+
+# Preview de producción
+npm run preview
+
+# Linting
+npm run lint
+
+# Type checking
+npm run typecheck
 ```
 
-## 📱 Páginas Principales
+### Tecnologías Utilizadas
 
-### 1. Página Principal (`/`)
-- Hero section con llamadas a la acción
-- Películas destacadas
-- Estadísticas generales
-- Características del cine
+- **Nuxt 3** - Framework Vue.js
+- **Vue 3** - Framework de JavaScript
+- **TypeScript** - Tipado estático
+- **Tailwind CSS** - Framework CSS
+- **Nuxt UI** - Componentes UI
+- **Pinia** - Gestión de estado
+- **VueUse** - Utilidades Vue
 
-### 2. Catálogo de Películas (`/peliculas`)
-- Lista paginada de películas
-- Filtros por género, fecha
-- Búsqueda por texto
-- Ordenamiento por rating
+## 📱 Responsive Design
 
-### 3. Detalle de Película (`/peliculas/{id}`)
-- Información completa de la película
-- Funciones disponibles
-- Trailer (si está disponible)
-- Botones de acción
+El sistema está completamente optimizado para:
+- **Desktop** (1024px+)
+- **Tablet** (768px - 1023px)
+- **Mobile** (320px - 767px)
 
-### 4. Selección de Asientos (`/funciones/{id}/asientos`)
-- Mapa interactivo de la sala
-- Selección visual de asientos
-- Resumen de compra
-- Estados de asientos (disponible, ocupado, reservado)
+## 🔒 Seguridad
 
-### 5. Proceso de Compra (`/comprar`)
-- Formulario de datos del cliente
-- Métodos de pago
-- Resumen de la compra
-- Confirmación de pago
-
-### 6. Métricas (`/metricas`)
-- Dashboard de estadísticas
-- Ranking de películas
-- Ocupación de salas
-- Tendencias y análisis
-
-## 🎯 Funcionalidades Clave
-
-### Gestión de Estado
-- **Pinia Store**: Estado global para películas, asientos, carrito
-- **Composables**: Lógica reutilizable (useApi, etc.)
-- **Reactive Data**: Vue 3 Composition API
-
-### Navegación
-- **Vue Router**: Navegación programática
-- **Active Links**: Indicadores de página activa
-- **Breadcrumbs**: Navegación contextual
-
-### Validación
-- **Formularios**: Validación en tiempo real
-- **Estados**: Loading, error, success
-- **Feedback**: Mensajes de confirmación
+- Middleware de autenticación en rutas protegidas
+- Validación de formularios en frontend y backend
+- Tokens de autenticación
+- Protección CSRF
 
 ## 🚀 Despliegue
 
-### Build de Producción
+### Producción
+
 ```bash
+# Build
 npm run build
+
+# Servir archivos estáticos
 npm run preview
 ```
 
-### Variables de Producción
-```env
-API_BASE_URL=https://api.cinemax.com
-NODE_ENV=production
+### Docker (opcional)
+
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
 ```
 
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear una rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit los cambios (`git commit -m 'Add some AmazingFeature'`)
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abrir un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
-## 👥 Autores
+## 📞 Soporte
 
-- **Equipo de Desarrollo** - *Trabajo inicial* - [Cinemax Team]
-
-## 🙏 Agradecimientos
-
-- **Nuxt Team** - Por el excelente framework
-- **Tailwind CSS** - Por el sistema de diseño
-- **Nuxt UI** - Por los componentes hermosos
-- **Heroicons** - Por los iconos increíbles
+Para soporte técnico o preguntas:
+- Crear un issue en GitHub
+- Contactar al equipo de desarrollo
 
 ---
 
-**Cinemax** - Transformando la experiencia cinematográfica 🎬✨
+**Desarrollado con ❤️ usando Nuxt 3 y Vue 3**
