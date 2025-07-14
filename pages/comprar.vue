@@ -160,7 +160,7 @@
                   <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Procesando...</span>
                 </div>
-                <span v-else>Pagar ${{ formatCurrency(totalPrecio) }}</span>
+                <span v-else>Pagar S/ {{ formatCurrency(totalPrecio) }}</span>
               </button>
               
               <!-- Mensaje de error si el formulario no es válido -->
@@ -208,7 +208,7 @@
                 </div>
                 <div class="flex justify-between">
                   <span>Precio por asiento:</span>
-                  <span class="font-semibold text-slate-900">${{ formatCurrency(precioPorAsiento) }}</span>
+                  <span class="font-semibold text-slate-900">S/ {{ formatCurrency(precioPorAsiento) }}</span>
                 </div>
               </div>
             </div>
@@ -237,7 +237,7 @@
                   class="flex items-center justify-between bg-slate-50 p-3 rounded-lg"
                 >
                   <span class="font-medium text-slate-900">{{ asiento.fila }}{{ asiento.numero }}</span>
-                  <span class="text-slate-900 font-semibold">${{ formatCurrency(precioPorAsiento) }}</span>
+                  <span class="text-slate-900 font-semibold">S/ {{ formatCurrency(precioPorAsiento) }}</span>
                 </div>
               </div>
             </div>
@@ -247,20 +247,20 @@
               <div class="space-y-2">
                 <div class="flex justify-between">
                   <span class="text-slate-500">Subtotal:</span>
-                  <span class="text-slate-500">${{ formatCurrency(subtotal) }}</span>
+                  <span class="text-slate-500">S/ {{ formatCurrency(subtotal) }}</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-slate-500">Servicio:</span>
-                  <span class="text-slate-500">${{ formatCurrency(cargoServicio) }}</span>
+                  <span class="text-slate-500">S/ {{ formatCurrency(cargoServicio) }}</span>
                 </div>
                 <div class="flex justify-between">
                   <span class="text-slate-500">IVA:</span>
-                  <span class="text-slate-500">${{ formatCurrency(iva) }}</span>
+                  <span class="text-slate-500">S/ {{ formatCurrency(iva) }}</span>
                 </div>
                 <div class="border-t border-slate-200 pt-2">
                   <div class="flex justify-between">
                     <span class="font-bold text-lg text-slate-900">Total:</span>
-                    <span class="font-bold text-lg text-slate-900">${{ formatCurrency(totalPrecio) }}</span>
+                    <span class="font-bold text-lg text-slate-900">S/ {{ formatCurrency(totalPrecio) }}</span>
                   </div>
                 </div>
               </div>
@@ -313,7 +313,7 @@
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-600">Total Pagado:</span>
-                <span class="text-slate-900 font-semibold">${{ formatCurrency(datosTransaccion?.total || totalPrecio) }}</span>
+                <span class="text-slate-900 font-semibold">S/ {{ formatCurrency(datosTransaccion?.total || totalPrecio) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-600">Asientos:</span>
@@ -785,26 +785,26 @@ const descargarComprobante = async () => {
               </div>
               <div class="row">
                 <span class="label">Fecha de Procesamiento:</span>
-                <span class="value">${new Date(datosTransaccion.value.resultado_pago.fecha_procesamiento).toLocaleString('es-CO')}</span>
+                <span class="value">${new Date(datosTransaccion.value.resultado_pago.fecha_procesamiento).toLocaleString('es-PE')}</span>
               </div>
             </div>
             
             <div class="total-section">
               <div class="total-row">
                 <span>Subtotal:</span>
-                <span>$${formatCurrency(datosTransaccion.value.resumen.subtotal)}</span>
+                <span>S/ ${formatCurrency(datosTransaccion.value.resumen.subtotal)}</span>
               </div>
               <div class="total-row">
                 <span>Descuentos:</span>
-                <span>$${formatCurrency(datosTransaccion.value.resumen.descuentos)}</span>
+                <span>S/ ${formatCurrency(datosTransaccion.value.resumen.descuentos)}</span>
               </div>
               <div class="total-row">
                 <span>Impuestos:</span>
-                <span>$${formatCurrency(datosTransaccion.value.resumen.impuestos)}</span>
+                <span>S/ ${formatCurrency(datosTransaccion.value.resumen.impuestos)}</span>
               </div>
               <div class="total-row total-final">
                 <span>TOTAL:</span>
-                <span>$${formatCurrency(datosTransaccion.value.total)}</span>
+                <span>S/ ${formatCurrency(datosTransaccion.value.total)}</span>
               </div>
             </div>
             
@@ -825,7 +825,7 @@ const descargarComprobante = async () => {
             <p>• Los asientos se liberan 5 minutos antes</p>
             <p style="margin-top: 20px; font-size: 0.75rem; color: #9ca3af;">
               CINEMAX - Sistema de Gestión de Entradas<br>
-              ${new Date().toLocaleDateString('es-CO')}
+              ${new Date().toLocaleDateString('es-PE')}
             </p>
           </div>
         </div>
@@ -857,7 +857,8 @@ const irAInicio = () => {
 
 // Función para formatear moneda
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('es-CO', {
+  return new Intl.NumberFormat('es-PE', {
+    style: 'decimal',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount)

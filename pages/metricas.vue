@@ -26,44 +26,76 @@
       </div>
 
       <!-- Content -->
-      <div v-else class="space-y-8">
-        <!-- Ranking de Películas -->
-        <div class="bg-white rounded-lg border border-slate-200 p-6">
+      <div v-else>
+        <!-- Stats Cards -->
+        <StatsCards :stats="estadisticas" />
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <!-- Ranking de Películas Chart -->
+          <div class="bg-white rounded-lg border border-slate-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-semibold text-slate-900">Ranking de Películas</h2>
+              <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+              </div>
+            </div>
+            
+            <div v-if="rankingLoading" class="flex justify-center py-8">
+              <div class="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+            </div>
+            
+            <div v-else-if="rankingError" class="text-red-600 text-center py-4">{{ rankingError }}</div>
+            
+            <div v-else>
+              <RankingChart :data="rankingPeliculas" />
+            </div>
+          </div>
+
+          <!-- Géneros Populares Chart -->
+          <div class="bg-white rounded-lg border border-slate-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-semibold text-slate-900">Géneros Más Populares</h2>
+              <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+              </div>
+            </div>
+            
+            <div v-if="generosLoading" class="flex justify-center py-8">
+              <div class="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+            </div>
+            
+            <div v-else-if="generosError" class="text-red-600 text-center py-4">{{ generosError }}</div>
+            
+            <div v-else>
+              <GenerosChart :data="generosPopulares" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Horarios Pico Chart -->
+        <div class="bg-white rounded-lg border border-slate-200 p-6 mb-8">
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-slate-900">Ranking de Películas</h2>
+            <h2 class="text-xl font-semibold text-slate-900">Horarios Pico</h2>
             <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
               <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
           </div>
           
-          <div v-if="rankingLoading" class="flex justify-center py-8">
+          <div v-if="horariosLoading" class="flex justify-center py-8">
             <div class="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
           </div>
           
-          <div v-else-if="rankingError" class="text-red-600 text-center py-4">{{ rankingError }}</div>
+          <div v-else-if="horariosError" class="text-red-600 text-center py-4">{{ horariosError }}</div>
           
-          <div v-else class="space-y-4">
-            <div 
-              v-for="(pelicula, index) in rankingPeliculas" 
-              :key="pelicula._id"
-              class="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
-            >
-              <div class="flex items-center space-x-4">
-                <div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-sm font-semibold text-slate-700">
-                  {{ index + 1 }}
-                </div>
-                <div>
-                  <h3 class="font-medium text-slate-900">{{ pelicula.titulo }}</h3>
-                  <p class="text-sm text-slate-600">{{ pelicula.genero }}</p>
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="text-lg font-semibold text-slate-900">{{ pelicula.ventas_totales }}</div>
-                <div class="text-sm text-slate-600">ventas</div>
-              </div>
-            </div>
+          <div v-else>
+            <HorariosChart :data="horariosPico" />
           </div>
         </div>
 
@@ -85,7 +117,16 @@
           <div v-else-if="ocupacionError" class="text-red-600 text-center py-4">{{ ocupacionError }}</div>
           
           <div v-else class="space-y-4">
+            <div v-if="ocupacionSalas.length === 0" class="text-center py-8">
+              <div class="text-slate-500 mb-2">
+                <svg class="w-12 h-12 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+              <p class="text-slate-600">No hay datos de ocupación disponibles</p>
+            </div>
             <div 
+              v-else
               v-for="sala in ocupacionSalas" 
               :key="sala._id"
               class="p-4 bg-slate-50 rounded-lg"
@@ -114,95 +155,17 @@
             </div>
           </div>
         </div>
-
-        <!-- Géneros Más Populares -->
-        <div class="bg-white rounded-lg border border-slate-200 p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-slate-900">Géneros Más Populares</h2>
-            <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-              </svg>
-            </div>
-          </div>
-          
-          <div v-if="generosLoading" class="flex justify-center py-8">
-            <div class="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
-          </div>
-          
-          <div v-else-if="generosError" class="text-red-600 text-center py-4">{{ generosError }}</div>
-          
-          <div v-else class="space-y-4">
-            <div 
-              v-for="genero in generosPopulares" 
-              :key="genero.genero"
-              class="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
-            >
-              <div class="flex items-center space-x-3">
-                <div class="w-3 h-3 bg-slate-600 rounded-full"></div>
-                <span class="font-medium text-slate-900">{{ genero.genero }}</span>
-              </div>
-              <div class="flex items-center space-x-4">
-                <div class="text-right">
-                  <div class="text-lg font-semibold text-slate-900">{{ genero.total_ventas }}</div>
-                  <div class="text-sm text-slate-600">ventas</div>
-                </div>
-                <div class="text-right">
-                  <div class="text-lg font-semibold text-slate-900">{{ genero.peliculas_count }}</div>
-                  <div class="text-sm text-slate-600">películas</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Horarios Pico -->
-        <div class="bg-white rounded-lg border border-slate-200 p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-slate-900">Horarios Pico</h2>
-            <div class="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-          </div>
-          
-          <div v-if="horariosLoading" class="flex justify-center py-8">
-            <div class="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
-          </div>
-          
-          <div v-else-if="horariosError" class="text-red-600 text-center py-4">{{ horariosError }}</div>
-          
-          <div v-else class="space-y-4">
-            <div 
-              v-for="horario in horariosPico" 
-              :key="horario.horario"
-              class="flex items-center justify-between p-4 bg-slate-50 rounded-lg"
-            >
-              <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center">
-                  <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                </div>
-                <div>
-                  <h3 class="font-medium text-slate-900">{{ horario.horario }}</h3>
-                  <p class="text-sm text-slate-600">{{ horario.dia_semana }}</p>
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="text-lg font-semibold text-slate-900">{{ horario.total_ventas }}</div>
-                <div class="text-sm text-slate-600">ventas</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import RankingChart from '~/components/charts/RankingChart.vue'
+import GenerosChart from '~/components/charts/GenerosChart.vue'
+import HorariosChart from '~/components/charts/HorariosChart.vue'
+import StatsCards from '~/components/charts/StatsCards.vue'
+
 const api = useApi()
 
 // Estado
@@ -233,7 +196,7 @@ const periodos = [
 
 // Estadísticas calculadas dinámicamente
 const estadisticas = computed(() => {
-  const totalVentas = rankingPeliculas.value.reduce((sum, pelicula) => sum + pelicula.ventas_totales, 0)
+  const totalVentas = rankingPeliculas.value.reduce((sum, pelicula) => sum + pelicula.total_ventas, 0)
   const entradasVendidas = rankingPeliculas.value.reduce((sum, pelicula) => sum + pelicula.total_asientos, 0)
   const peliculasActivas = rankingPeliculas.value.length
   
@@ -253,7 +216,7 @@ const estadisticas = computed(() => {
 // Computed
 const maxVentas = computed(() => {
   if (rankingPeliculas.value.length === 0) return 1
-  return Math.max(...rankingPeliculas.value.map(p => p.total_asientos))
+  return Math.max(...rankingPeliculas.value.map(p => p.total_ventas))
 })
 
 // Cargar ranking
@@ -263,9 +226,11 @@ const cargarRanking = async () => {
   
   try {
     const response = await api.getRankingPeliculas(10)
+    console.log('Respuesta del ranking:', response)
     if (response.success && response.data) {
       // Extraer el array ranking_mongodb del response
       rankingPeliculas.value = response.data.ranking_mongodb || []
+      console.log('Ranking de películas cargado:', rankingPeliculas.value)
     } else {
       rankingError.value = response.error || 'Error al cargar el ranking'
     }
@@ -374,6 +339,15 @@ const cargarHorariosPico = async () => {
   } finally {
     horariosLoading.value = false
   }
+}
+
+// Función para formatear moneda
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('es-PE', {
+    style: 'decimal',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount)
 }
 
 // Cargar datos al montar el componente

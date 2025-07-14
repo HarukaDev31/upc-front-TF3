@@ -119,7 +119,7 @@
                     </div>
                     <div class="text-right">
                       <span class="text-sm text-slate-600">Total:</span>
-                      <p class="text-lg font-bold text-slate-900">${{ formatCurrency(transaccion.total) }}</p>
+                      <p class="text-lg font-bold text-slate-900">S/ {{ formatCurrency(transaccion.total) }}</p>
                     </div>
                   </div>
                 </div>
@@ -218,7 +218,7 @@
             <div class="border-t border-slate-200 pt-4">
               <div class="flex justify-between items-center">
                 <span class="text-lg font-semibold text-slate-900">Total</span>
-                <span class="text-2xl font-bold text-slate-900">${{ formatCurrency(transaccionSeleccionada.total) }}</span>
+                <span class="text-2xl font-bold text-slate-900">S/ {{ formatCurrency(transaccionSeleccionada.total) }}</span>
               </div>
             </div>
           </div>
@@ -315,7 +315,7 @@ const verDetalles = (transaccion) => {
 
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
-  return new Date(dateString).toLocaleDateString('es-CO', {
+  return new Date(dateString).toLocaleDateString('es-PE', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -325,7 +325,8 @@ const formatDate = (dateString) => {
 }
 
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('es-CO', {
+  return new Intl.NumberFormat('es-PE', {
+    style: 'decimal',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount)
