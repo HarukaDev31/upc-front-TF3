@@ -243,10 +243,6 @@ export const useAuth = () => {
   // Obtener el ID del usuario actual
   const getCurrentUserId = (): string | null => {
     const userId = user.value?.id || null
-    // Solo log cuando se llama desde selectSeat o deselectSeat
-    if (new Error().stack?.includes('selectSeat') || new Error().stack?.includes('deselectSeat')) {
-      console.log('getCurrentUserId llamado - User ID:', userId)
-    }
     return userId
   }
 
@@ -271,10 +267,8 @@ export const useAuth = () => {
       })
     } catch (e) {
       // Si onMounted falla, significa que no estamos en el contexto de un componente
-      // En este caso, solo verificar la autenticación directamente
-      checkAuth().catch(error => {
-        console.error('Error verificando autenticación:', error)
-      })
+      // En este caso, no hacer nada para evitar errores de inicialización
+      console.log('useAuth: No se pudo inicializar onMounted, saltando inicialización automática')
     }
   }
 

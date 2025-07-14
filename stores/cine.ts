@@ -1,16 +1,45 @@
 import { defineStore } from 'pinia'
 
+// Tipos
+interface Pelicula {
+  id: string
+  titulo: string
+  rating: number
+  [key: string]: any
+}
+
+interface Funcion {
+  id: string
+  estado: string
+  [key: string]: any
+}
+
+interface Asiento {
+  id: string
+  fila: string
+  numero: string
+  codigo: string
+  disponible: boolean
+  [key: string]: any
+}
+
+interface EntradaCarrito {
+  id: string
+  precio_total: number
+  [key: string]: any
+}
+
 export const useCineStore = defineStore('cine', () => {
   // Estado
-  const peliculas = ref([])
-  const funciones = ref([])
-  const asientosSeleccionados = ref([])
-  const funcionActual = ref(null)
+  const peliculas = ref<Pelicula[]>([])
+  const funciones = ref<Funcion[]>([])
+  const asientosSeleccionados = ref<Asiento[]>([])
+  const funcionActual = ref<Funcion | null>(null)
   const totalCompra = ref(0)
-  const clienteActual = ref(null)
-  const carrito = ref([])
+  const clienteActual = ref<any>(null)
+  const carrito = ref<EntradaCarrito[]>([])
   const loading = ref(false)
-  const error = ref(null)
+  const error = ref<string | null>(null)
 
   // Getters
   const peliculasDisponibles = computed(() => 
@@ -30,25 +59,25 @@ export const useCineStore = defineStore('cine', () => {
   )
 
   // Actions
-  const setPeliculas = (nuevasPeliculas) => {
+  const setPeliculas = (nuevasPeliculas: Pelicula[]) => {
     peliculas.value = nuevasPeliculas
   }
 
-  const setFunciones = (nuevasFunciones) => {
+  const setFunciones = (nuevasFunciones: Funcion[]) => {
     funciones.value = nuevasFunciones
   }
 
-  const setAsientosSeleccionados = (asientos) => {
+  const setAsientosSeleccionados = (asientos: Asiento[]) => {
     asientosSeleccionados.value = asientos
   }
 
-  const agregarAsiento = (asiento) => {
+  const agregarAsiento = (asiento: Asiento) => {
     if (asiento.disponible) {
       asientosSeleccionados.value.push(asiento)
     }
   }
 
-  const removerAsiento = (asientoCodigo) => {
+  const removerAsiento = (asientoCodigo: string) => {
     asientosSeleccionados.value = asientosSeleccionados.value.filter(
       a => a.codigo !== asientoCodigo
     )
@@ -58,23 +87,23 @@ export const useCineStore = defineStore('cine', () => {
     asientosSeleccionados.value = []
   }
 
-  const setFuncionActual = (funcion) => {
+  const setFuncionActual = (funcion: Funcion) => {
     funcionActual.value = funcion
   }
 
-  const setTotalCompra = (total) => {
+  const setTotalCompra = (total: number) => {
     totalCompra.value = total
   }
 
-  const setCliente = (cliente) => {
+  const setCliente = (cliente: any) => {
     clienteActual.value = cliente
   }
 
-  const agregarAlCarrito = (entrada) => {
+  const agregarAlCarrito = (entrada: EntradaCarrito) => {
     carrito.value.push(entrada)
   }
 
-  const removerDelCarrito = (entradaId) => {
+  const removerDelCarrito = (entradaId: string) => {
     carrito.value = carrito.value.filter(e => e.id !== entradaId)
   }
 
@@ -82,11 +111,11 @@ export const useCineStore = defineStore('cine', () => {
     carrito.value = []
   }
 
-  const setLoading = (estado) => {
+  const setLoading = (estado: boolean) => {
     loading.value = estado
   }
 
-  const setError = (mensaje) => {
+  const setError = (mensaje: string | null) => {
     error.value = mensaje
   }
 
@@ -104,7 +133,7 @@ export const useCineStore = defineStore('cine', () => {
     // Estado
     peliculas: readonly(peliculas),
     funciones: readonly(funciones),
-    asientosSeleccionados: readonly(asientosSeleccionados),
+    asientosSeleccionados,
     funcionActual: readonly(funcionActual),
     totalCompra: readonly(totalCompra),
     clienteActual: readonly(clienteActual),

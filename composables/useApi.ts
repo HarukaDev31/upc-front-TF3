@@ -209,6 +209,37 @@ export const useApi = () => {
   const getOcupacionSala = (funcionId: string) => 
     apiRequest(`/api/v1/metricas/ocupacion/${funcionId}`)
 
+  // ===== GESTIÓN DE TRANSACCIONES =====
+  
+  // Comprar entrada
+  const comprarEntradaTransaccion = (datosCompra: any) => 
+    authenticatedRequest('/api/v1/transacciones/comprar-entrada', {
+      method: 'POST',
+      body: datosCompra
+    })
+
+  // Obtener historial de compras
+  const getHistorialCompras = (limite = 20) => 
+    authenticatedRequest(`/api/v1/transacciones/historial?limit=${limite}`)
+
+  // Cancelar transacción
+  const cancelarTransaccion = (transaccionId: string) => 
+    authenticatedRequest(`/api/v1/transacciones/${transaccionId}/cancelar`, {
+      method: 'POST'
+    })
+
+  // Obtener detalles de transacción
+  const getDetallesTransaccion = (transaccionId: string) => 
+    authenticatedRequest(`/api/v1/transacciones/${transaccionId}`)
+
+  // Obtener asientos ocupados de una función
+  const getAsientosOcupados = (funcionId: string) => 
+    apiRequest(`/api/v1/transacciones/funciones/${funcionId}/asientos-ocupados`)
+
+  // Obtener estadísticas de ventas (solo admin)
+  const getEstadisticasVentas = (fechaInicio: string, fechaFin: string) => 
+    authenticatedRequest(`/api/v1/transacciones/estadisticas/ventas?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`)
+
   return {
     // ===== GESTIÓN DE USUARIOS =====
     registerUser,
@@ -248,6 +279,14 @@ export const useApi = () => {
     
     // Métricas
     getRankingPeliculas,
-    getOcupacionSala
+    getOcupacionSala,
+
+    // ===== GESTIÓN DE TRANSACCIONES =====
+    comprarEntradaTransaccion,
+    getHistorialCompras,
+    cancelarTransaccion,
+    getDetallesTransaccion,
+    getAsientosOcupados,
+    getEstadisticasVentas
   }
 } 

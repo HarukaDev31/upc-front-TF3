@@ -2,6 +2,12 @@ export default defineNuxtRouteMiddleware((to, from) => {
   // Solo ejecutar en el cliente
   if (process.client) {
     try {
+      // Verificar si localStorage está disponible
+      if (typeof localStorage === 'undefined') {
+        console.log('Middleware Guest - localStorage no disponible, permitiendo acceso')
+        return
+      }
+      
       // Verificar si hay token en localStorage
       const token = localStorage.getItem('auth_token')
       const userData = localStorage.getItem('user_data')

@@ -22,7 +22,7 @@
             Ver Películas
           </UButton>
           <UButton 
-            to="/cartelera" 
+            to="/peliculas" 
             size="lg" 
             variant="outline"
             class="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-gray-900"

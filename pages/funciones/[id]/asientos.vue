@@ -87,6 +87,10 @@
                   <span class="text-gray-300 text-sm">Seleccionado</span>
                 </div>
                 <div class="flex items-center space-x-2">
+                  <div class="w-6 h-6 bg-orange-600 rounded border-2 border-orange-500"></div>
+                  <span class="text-gray-300 text-sm">Temporal</span>
+                </div>
+                <div class="flex items-center space-x-2">
                   <div class="w-6 h-6 bg-red-600 rounded border-2 border-red-500"></div>
                   <span class="text-gray-300 text-sm">Ocupado</span>
                 </div>
@@ -214,6 +218,7 @@ const {
   deselectSeat,
   getSeatStatus,
   isSeatAvailable,
+  isSeatConfirmed,
   isSeatSelectedByMe,
   onConnectionStatusChanged,
   connect
@@ -249,6 +254,13 @@ const toggleSeat = async (asientoId) => {
   console.log('Asiento ID:', asientoId)
   console.log('¿Está seleccionado por mí?', isSeatSelectedByMe(asientoId))
   console.log('¿Está disponible?', isSeatAvailable(asientoId))
+  console.log('¿Está confirmado?', isSeatConfirmed(asientoId))
+  
+  // No permitir interactuar con asientos confirmados
+  if (isSeatConfirmed(asientoId)) {
+    console.log('Asiento confirmado, no se puede interactuar:', asientoId)
+    return
+  }
   
   if (isSeatSelectedByMe(asientoId)) {
     console.log('Deseleccionando asiento:', asientoId)
@@ -267,27 +279,47 @@ const getSeatClasses = (asientoId) => {
   
   switch (status) {
     case 'selected':
-      return 'bg-purple-600 border-purple-500 text-white hover:bg-purple-700'
+      return 'bg-purple-600 border-purple-500 text-white hover:bg-purple-700 cursor-pointer'
     case 'confirmed':
-      return 'bg-green-600 border-green-500 text-white'
+      return 'bg-green-600 border-green-500 text-white cursor-not-allowed opacity-75'
     case 'occupied':
-    case 'taken':
       return 'bg-red-600 border-red-500 text-white cursor-not-allowed opacity-50'
+    case 'taken':
+      return 'bg-orange-600 border-orange-500 text-white cursor-not-allowed opacity-60'
     default:
-      return 'bg-gray-600 border-gray-500 text-white hover:bg-gray-700 hover:border-gray-400'
+      return 'bg-gray-600 border-gray-500 text-white hover:bg-gray-700 hover:border-gray-400 cursor-pointer'
   }
 }
 
 // Función para continuar con la compra
 const continuarCompra = () => {
+  console.log('=== CONTINUAR COMPRA ===')
+  console.log('Asientos seleccionados:', selectedSeatsArray.value)
+  console.log('Cantidad de asientos:', selectedSeatsArray.value.length)
+  
   if (selectedSeatsArray.value.length > 0) {
-    // Guardar selecciones en localStorage para la página de compra
+    // Guardar datos completos en localStorage para la página de compra
     if (process.client) {
-      localStorage.setItem(`selecciones_${funcionId}`, JSON.stringify(selectedSeatsArray.value))
+      const datosCompra = {
+        asientos: selectedSeatsArray.value,
+        funcion: funcion.value,
+        pelicula: pelicula.value,
+        precioPorAsiento: funcion.value.precio
+      }
+      
+      console.log('Datos a guardar en localStorage:', datosCompra)
+      localStorage.setItem(`datos_compra_${funcionId}`, JSON.stringify(datosCompra))
+      
+      // Verificar que se guardó correctamente
+      const datosGuardados = localStorage.getItem(`datos_compra_${funcionId}`)
+      console.log('Datos guardados en localStorage:', datosGuardados)
     }
     
     // Redirigir a la página de compra
+    console.log('Redirigiendo a compra con función:', funcionId)
     router.push(`/comprar?funcion=${funcionId}`)
+  } else {
+    console.log('No hay asientos seleccionados para continuar')
   }
 }
 

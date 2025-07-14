@@ -22,7 +22,7 @@
             <h3 class="text-lg font-semibold text-white mb-4">Enlaces</h3>
             <ul class="space-y-2 text-gray-400">
               <li><NuxtLink to="/peliculas" class="hover:text-white transition-colors">Películas</NuxtLink></li>
-              <li><NuxtLink to="/cartelera" class="hover:text-white transition-colors">Cartelera</NuxtLink></li>
+              <li><NuxtLink to="/peliculas" class="hover:text-white transition-colors">Cartelera</NuxtLink></li>
               <li><NuxtLink to="/metricas" class="hover:text-white transition-colors">Métricas</NuxtLink></li>
             </ul>
           </div>

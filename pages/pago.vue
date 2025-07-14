@@ -155,7 +155,7 @@
                     value="tarjeta"
                     class="text-purple-600 focus:ring-purple-500"
                   />
-                  <span class="text-gray-700">Tarjeta de Crédito/Débito</span>
+                  <span class="text-black-700">Tarjeta de Crédito/Débito</span>
                 </label>
                 <label class="flex items-center space-x-3 cursor-pointer">
                   <input 

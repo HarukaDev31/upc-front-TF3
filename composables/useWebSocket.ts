@@ -493,38 +493,51 @@ export const useWebSocket = (funcionId: string) => {
       const response = await getSeleccionesByFuncion(funcionId)
       
       if (response.success && response.data) {
-        // Filtrar solo selecciones activas (temporal o confirmada) y no expiradas
+        console.log('Todas las selecciones del servidor:', response.data)
+        
+        // Filtrar selecciones activas y confirmadas
         const currentTime = new Date()
         const activeSelections = response.data.filter((selection: SeatSelection) => {
-          // Solo incluir selecciones en estado temporal o confirmada
+          // Incluir selecciones en estado temporal o confirmada
           if (selection.estado !== 'temporal' && selection.estado !== 'confirmada') {
+            console.log(`Excluyendo asiento ${selection.asiento_id} con estado: ${selection.estado}`)
             return false
           }
           
-          // Verificar si no está expirada
-          if (selection.fecha_expiracion) {
+          // Para selecciones temporales, verificar si no está expirada
+          if (selection.estado === 'temporal' && selection.fecha_expiracion) {
             const expirationDate = new Date(selection.fecha_expiracion)
             if (expirationDate < currentTime) {
+              console.log(`Excluyendo asiento ${selection.asiento_id} por expiración`)
               return false
             }
           }
           
+          // Las selecciones confirmadas siempre se incluyen (no expiran)
+          console.log(`Incluyendo asiento ${selection.asiento_id} con estado: ${selection.estado}`)
           return true
         })
         
         console.log('Selecciones cargadas del servidor:', response.data.length)
         console.log('Selecciones activas filtradas:', activeSelections.length)
+        console.log('Selecciones activas:', activeSelections)
         
         seatSelections.value = activeSelections
         
         // Actualizar estado de asientos seleccionados
         const userId = getCurrentUserId()
         activeSelections.forEach((selection: SeatSelection) => {
+          console.log(`Procesando asiento ${selection.asiento_id} - Estado: ${selection.estado} - Usuario: ${selection.usuario_id} vs ${userId}`)
+          
           // Usar el ID real del usuario para comparar
           if (selection.usuario_id === userId) {
             // Es mi selección
-            selectedSeats.value.add(selection.asiento_id)
-            console.log(`Asiento ${selection.asiento_id} cargado como seleccionado por mí`)
+            if (selection.estado === 'confirmada') {
+              console.log(`Asiento ${selection.asiento_id} cargado como CONFIRMADO por mí`)
+            } else {
+              selectedSeats.value.add(selection.asiento_id)
+              console.log(`Asiento ${selection.asiento_id} cargado como seleccionado por mí`)
+            }
           } else {
             // Es de otro usuario
             otherUsersSeats.value.set(selection.asiento_id, selection.usuario_id)
@@ -556,7 +569,28 @@ export const useWebSocket = (funcionId: string) => {
       return 'available'
     }
     
-    // Primero verificar en mis selecciones locales
+    // Verificar en las selecciones del servidor primero
+    const selection = seatSelections.value.find(s => s.asiento_id === asientoId)
+    if (selection) {
+      console.log(`Estado de asiento ${asientoId}: ${selection.estado} - Usuario: ${selection.usuario_id} vs ${userId}`)
+      
+      // Usar el ID real del usuario para comparar
+      if (selection.usuario_id === userId) {
+        if (selection.estado === 'confirmada') {
+          return 'confirmed'
+        } else {
+          return 'selected'
+        }
+      } else {
+        if (selection.estado === 'confirmada') {
+          return 'occupied'
+        } else {
+          return 'taken'
+        }
+      }
+    }
+    
+    // Verificar en mis selecciones locales
     if (selectedSeats.value.has(asientoId)) {
       return 'selected'
     }
@@ -564,17 +598,6 @@ export const useWebSocket = (funcionId: string) => {
     // Verificar si está en selecciones de otros usuarios
     if (otherUsersSeats.value.has(asientoId)) {
       return 'taken'
-    }
-    
-    // Verificar en las selecciones del servidor
-    const selection = seatSelections.value.find(s => s.asiento_id === asientoId)
-    if (selection) {
-      // Usar el ID real del usuario para comparar
-      if (selection.usuario_id === userId) {
-        return selection.estado === 'confirmada' ? 'confirmed' : 'selected'
-      } else {
-        return selection.estado === 'confirmada' ? 'occupied' : 'taken'
-      }
     }
     
     return 'available'
@@ -586,6 +609,14 @@ export const useWebSocket = (funcionId: string) => {
     const available = status === 'available'
     console.log(`isSeatAvailable(${asientoId}) -> status: ${status}, available: ${available}`)
     return available
+  }
+
+  // Verificar si asiento está confirmado (no se puede interactuar)
+  const isSeatConfirmed = (asientoId: string) => {
+    const status = getSeatStatus(asientoId)
+    const confirmed = status === 'confirmed' || status === 'occupied'
+    console.log(`isSeatConfirmed(${asientoId}) -> status: ${status}, confirmed: ${confirmed}`)
+    return confirmed
   }
 
   // Verificar si asiento está seleccionado por el usuario actual
@@ -707,6 +738,7 @@ export const useWebSocket = (funcionId: string) => {
     deselectSeat,
     getSeatStatus,
     isSeatAvailable,
+    isSeatConfirmed,
     isSeatSelectedByMe,
     getSeatUser,
     clearSelections,

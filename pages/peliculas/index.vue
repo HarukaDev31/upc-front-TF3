@@ -204,11 +204,11 @@ const cargarPeliculas = async () => {
     const offset = (paginaActual.value - 1) * limite
     const response = await api.getPeliculas(limite, offset)
     
-    if (response.peliculas) {
-      peliculas.value = response.peliculas || []
-      totalPeliculas.value = response.peliculas.total || 0
-      totalPaginas.value = response.peliculas.total_pages || 0
-      setPeliculas(response.peliculas || [])
+    if (response.data.peliculas) {
+      peliculas.value = response.data.peliculas || []
+      totalPeliculas.value = response.data.peliculas.total || 0
+      totalPaginas.value = response.data.peliculas.total_pages || 0
+      setPeliculas(response.data.peliculas || [])
     } else {
       error.value = response.error || 'Error al cargar las películas'
     }
@@ -238,11 +238,11 @@ const buscarPeliculas = async () => {
       limite: limite
     })
     
-    if (response.peliculas) {
-      peliculas.value = response.peliculas
-      totalPeliculas.value = response.peliculas.length
+      if (response.data.peliculas) {
+      peliculas.value = response.data.peliculas
+      totalPeliculas.value = response.data.peliculas.length
       totalPaginas.value = 1
-      setPeliculas(response.peliculas)
+      setPeliculas(response.data.peliculas)
     } else {
       error.value = response.error || 'Error en la búsqueda'
     }
