@@ -177,7 +177,7 @@ export const useApi = () => {
 
   // Gestión de películas
   const getPeliculas = (limite = 20, offset = 0) => 
-    apiRequest(`/api/v1/peliculas?limite=${limite}&offset=${offset}`)
+    apiRequest(`/api/v1/peliculas/list?limite=${limite}&offset=${offset}`)
 
   const getPeliculaConFunciones = (peliculaId: string) => 
     apiRequest(`/api/v1/peliculas/${peliculaId}/funciones`)
