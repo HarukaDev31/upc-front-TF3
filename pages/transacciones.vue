@@ -1,540 +1,321 @@
 <template>
-  <div>
+  <div class="min-h-screen bg-slate-50">
     <!-- Header -->
-    <section class="bg-gradient-to-r from-purple-600 to-pink-600 py-16">
-      <div class="container mx-auto px-4 text-center text-white">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">Mis Transacciones</h1>
-        <p class="text-xl text-purple-100">Historial de compras y transacciones</p>
+    <section class="bg-white border-b border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Mis Transacciones</h1>
+            <p class="text-slate-600">Historial de todas tus compras y reservas</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Contenido principal -->
-    <section class="py-12 bg-gray-50">
-      <div class="container mx-auto px-4">
-        <!-- Filtros y búsqueda -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div class="flex flex-col lg:flex-row gap-6 items-center justify-between">
-            <!-- Búsqueda -->
-            <div class="flex-1 max-w-md">
-              <UInput
-                v-model="filtros.numeroFactura"
-                placeholder="Buscar por número de factura..."
-                icon="heroicons:magnifying-glass"
-                @input="filtrarTransacciones"
-              />
+    <!-- Contenido -->
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Filtros -->
+        <div class="mb-8">
+          <div class="flex flex-wrap gap-4 items-center">
+            <div class="flex items-center space-x-4">
+              <label class="text-sm font-medium text-slate-700">Filtrar por:</label>
+              <select 
+                v-model="filtroEstado" 
+                class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              >
+                <option value="">Todos los estados</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
             </div>
-
-            <!-- Filtros -->
-            <div class="flex flex-wrap gap-4">
-              <USelect
-                v-model="filtros.estado"
-                :options="opcionesEstado"
-                placeholder="Estado"
-                class="w-40"
-                @update:model-value="filtrarTransacciones"
-              />
-              
-              <USelect
-                v-model="filtros.metodoPago"
-                :options="opcionesMetodoPago"
-                placeholder="Método de pago"
-                class="w-40"
-                @update:model-value="filtrarTransacciones"
-              />
+            
+            <div class="flex items-center space-x-4">
+              <label class="text-sm font-medium text-slate-700">Ordenar por:</label>
+              <select 
+                v-model="ordenarPor" 
+                class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+              >
+                <option value="fecha_desc">Más recientes</option>
+                <option value="fecha_asc">Más antiguos</option>
+                <option value="total_desc">Mayor monto</option>
+                <option value="total_asc">Menor monto</option>
+              </select>
             </div>
-
-            <!-- Ordenar -->
-            <USelect
-              v-model="orden"
-              :options="opcionesOrden"
-              placeholder="Ordenar por"
-              class="w-40"
-              @update:model-value="ordenarTransacciones"
-            />
           </div>
         </div>
 
-        <!-- Loading -->
-        <div v-if="loading" class="flex justify-center py-12">
-          <UIcon name="heroicons:arrow-path" class="w-8 h-8 animate-spin text-purple-500" />
+        <!-- Estado de carga -->
+        <div v-if="loading" class="text-center py-12">
+          <div class="w-8 h-8 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin mx-auto mb-4"></div>
+          <p class="text-slate-600">Cargando transacciones...</p>
         </div>
 
         <!-- Error -->
-        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-          <UIcon name="heroicons:exclamation-triangle" class="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 class="text-lg font-semibold text-red-800 mb-2">Error al cargar transacciones</h3>
-          <p class="text-red-600 mb-4">{{ error }}</p>
-          <UButton @click="cargarTransacciones" color="red" variant="outline">
+        <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <svg class="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-red-900 mb-2">Error al cargar transacciones</h3>
+          <p class="text-red-700 mb-4">{{ error }}</p>
+          <button 
+            @click="cargarTransacciones"
+            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
             Intentar de nuevo
-          </UButton>
+          </button>
         </div>
 
         <!-- Lista de transacciones -->
-        <div v-else-if="transaccionesFiltradas.length > 0" class="space-y-6">
+        <div v-else-if="transacciones.length > 0" class="space-y-6">
           <div 
             v-for="transaccion in transaccionesFiltradas" 
             :key="transaccion.id"
-            class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+            class="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition-shadow"
           >
-            <!-- Header de la transacción -->
-            <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white">
-              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div>
-                  <h3 class="text-xl font-bold mb-2">{{ transaccion.numero_factura }}</h3>
-                  <p class="text-purple-100">{{ formatDate(transaccion.fecha) }}</p>
-                </div>
-                <div class="flex items-center gap-4">
-                  <UBadge 
-                    :color="getEstadoColor(transaccion.estado)"
-                    variant="solid"
-                    class="text-sm font-semibold"
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-3">
+                  <h3 class="text-lg font-semibold text-slate-900">
+                    {{ transaccion.pelicula?.titulo || 'Película no disponible' }}
+                  </h3>
+                  <span 
+                    class="px-2 py-1 text-xs font-medium rounded-full"
+                    :class="{
+                      'bg-green-100 text-green-800': transaccion.estado === 'confirmado',
+                      'bg-yellow-100 text-yellow-800': transaccion.estado === 'pendiente',
+                      'bg-red-100 text-red-800': transaccion.estado === 'cancelado'
+                    }"
                   >
-                    {{ getEstadoText(transaccion.estado) }}
-                  </UBadge>
-                  <UButton
-                    @click="verDetalles(transaccion)"
-                    variant="outline"
-                    color="white"
-                    size="sm"
-                  >
-                    Ver Detalles
-                  </UButton>
+                    {{ transaccion.estado?.toUpperCase() }}
+                  </span>
                 </div>
-              </div>
-            </div>
-
-            <!-- Contenido de la transacción -->
-            <div class="p-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Información básica -->
-                <div>
-                  <h4 class="font-semibold text-gray-900 mb-2">Información</h4>
-                  <div class="space-y-1 text-sm text-gray-600">
-                    <p><span class="font-medium">ID:</span> {{ transaccion.id }}</p>
-                    <p><span class="font-medium">Función:</span> {{ transaccion.funcion_id }}</p>
-                    <p><span class="font-medium">Método:</span> {{ getMetodoPagoText(transaccion.metodo_pago) }}</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-slate-600">
+                  <div>
+                    <span class="font-medium">Número de Factura:</span>
+                    <p class="font-mono">{{ transaccion.numero_factura }}</p>
+                  </div>
+                  <div>
+                    <span class="font-medium">Fecha:</span>
+                    <p>{{ formatDate(transaccion.fecha) }}</p>
+                  </div>
+                  <div>
+                    <span class="font-medium">Sala:</span>
+                    <p>{{ transaccion.sala?.nombre || 'N/A' }}</p>
+                  </div>
+                  <div>
+                    <span class="font-medium">Asientos:</span>
+                    <p>{{ transaccion.asientos?.join(', ') || 'N/A' }}</p>
                   </div>
                 </div>
-
-                <!-- Asientos -->
-                <div>
-                  <h4 class="font-semibold text-gray-900 mb-2">Asientos</h4>
-                  <div class="flex flex-wrap gap-1">
-                    <UBadge 
-                      v-for="asiento in transaccion.asientos" 
-                      :key="asiento"
-                      color="purple"
-                      variant="soft"
-                      class="text-xs"
-                    >
-                      {{ asiento }}
-                    </UBadge>
-                  </div>
-                </div>
-
-                <!-- Total -->
-                <div>
-                  <h4 class="font-semibold text-gray-900 mb-2">Total</h4>
-                  <p class="text-2xl font-bold text-green-600">
-                    ${{ formatCurrency(transaccion.total) }}
-                  </p>
-                </div>
-
-                <!-- Acciones -->
-                <div>
-                  <h4 class="font-semibold text-gray-900 mb-2">Acciones</h4>
-                  <div class="space-y-2">
-                    <UButton
-                      v-if="transaccion.estado === 'confirmado'"
-                      @click="cancelarTransaccion(transaccion.id)"
-                      color="red"
-                      variant="outline"
-                      size="sm"
-                      :loading="cancelando === transaccion.id"
-                    >
-                      Cancelar
-                    </UButton>
-                    <UButton
-                      @click="descargarComprobante(transaccion)"
-                      color="purple"
-                      variant="outline"
-                      size="sm"
-                    >
-                      Descargar
-                    </UButton>
+                
+                <div class="mt-4 pt-4 border-t border-slate-200">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-slate-600">
+                      <span class="font-medium">Método de pago:</span>
+                      <span class="ml-2">{{ transaccion.metodo_pago?.toUpperCase() }}</span>
+                    </div>
+                    <div class="text-right">
+                      <span class="text-sm text-slate-600">Total:</span>
+                      <p class="text-lg font-bold text-slate-900">${{ formatCurrency(transaccion.total) }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
+              
+              <div class="flex items-center space-x-2 ml-4">
+                <button
+                  @click="descargarComprobante(transaccion)"
+                  class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                  title="Descargar comprobante"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </button>
+                
+                <button
+                  @click="verDetalles(transaccion)"
+                  class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                  title="Ver detalles"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-
-          <!-- Paginación -->
-          <div v-if="totalPaginas > 1" class="flex justify-center mt-8">
-            <UPagination
-              v-model="paginaActual"
-              :page-count="totalPaginas"
-              :total="totalTransacciones"
-              @update:model-value="cambiarPagina"
-            />
           </div>
         </div>
 
         <!-- Sin transacciones -->
-        <div v-else class="bg-white rounded-xl shadow-lg p-12 text-center">
-          <UIcon name="heroicons:document-text" class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">No hay transacciones</h3>
-          <p class="text-gray-600 mb-6">Aún no has realizado ninguna compra</p>
-          <UButton to="/peliculas" color="purple">
+        <div v-else class="text-center py-12">
+          <svg class="w-16 h-16 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-slate-900 mb-2">No hay transacciones</h3>
+          <p class="text-slate-600 mb-6">Aún no has realizado ninguna compra.</p>
+          <NuxtLink 
+            to="/peliculas"
+            class="inline-flex items-center px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M6 20h12M4 12h16"></path>
+            </svg>
             Ver Películas
-          </UButton>
+          </NuxtLink>
         </div>
       </div>
     </section>
 
     <!-- Modal de detalles -->
-    <UModal v-model="detallesAbierto" :ui="{ width: 'sm:max-w-4xl' }">
-      <div v-if="transaccionSeleccionada" class="p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Detalles de Transacción</h2>
-          <UButton @click="detallesAbierto = false" variant="ghost" color="gray">
-            <UIcon name="heroicons:x-mark" class="w-5 h-5" />
-          </UButton>
-        </div>
-
-        <!-- Información detallada -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Información básica -->
-          <div class="space-y-6">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Información General</h3>
-              <div class="space-y-3">
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Número de Factura:</span>
-                  <span class="font-medium">{{ transaccionSeleccionada.numero_factura }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">ID de Transacción:</span>
-                  <span class="font-medium">{{ transaccionSeleccionada.id }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Fecha:</span>
-                  <span class="font-medium">{{ formatDateTime(transaccionSeleccionada.fecha_creacion) }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Estado:</span>
-                  <UBadge :color="getEstadoColor(transaccionSeleccionada.estado)">
-                    {{ getEstadoText(transaccionSeleccionada.estado) }}
-                  </UBadge>
-                </div>
-              </div>
-            </div>
-
-            <!-- Asientos -->
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Asientos</h3>
-              <div class="flex flex-wrap gap-2">
-                <UBadge 
-                  v-for="asiento in transaccionSeleccionada.asientos" 
-                  :key="asiento"
-                  color="purple"
-                  variant="solid"
-                >
-                  {{ asiento }}
-                </UBadge>
-              </div>
-            </div>
-
-            <!-- Método de pago -->
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Método de Pago</h3>
-              <div class="flex items-center gap-3">
-                <UIcon :name="getMetodoPagoIcon(transaccionSeleccionada.metodo_pago)" class="w-6 h-6 text-purple-500" />
-                <span class="font-medium">{{ getMetodoPagoText(transaccionSeleccionada.metodo_pago) }}</span>
-              </div>
-            </div>
+    <div v-if="mostrarModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-slate-900">Detalles de la Transacción</h3>
+            <button 
+              @click="mostrarModal = false"
+              class="text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
           </div>
-
-          <!-- Resumen financiero -->
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Resumen Financiero</h3>
-            <div class="bg-gray-50 rounded-lg p-4 space-y-3">
-              <div class="flex justify-between">
-                <span class="text-gray-600">Subtotal:</span>
-                <span class="font-medium">${{ formatCurrency(transaccionSeleccionada.subtotal || 0) }}</span>
+          
+          <div v-if="transaccionSeleccionada" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <span class="text-sm font-medium text-slate-600">Número de Factura</span>
+                <p class="font-mono text-slate-900">{{ transaccionSeleccionada.numero_factura }}</p>
               </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600">Descuentos:</span>
-                <span class="font-medium text-green-600">-${{ formatCurrency(transaccionSeleccionada.descuento_cliente || 0) }}</span>
+              <div>
+                <span class="text-sm font-medium text-slate-600">Estado</span>
+                <p class="text-slate-900">{{ transaccionSeleccionada.estado?.toUpperCase() }}</p>
               </div>
-              <div class="flex justify-between">
-                <span class="text-gray-600">Impuestos:</span>
-                <span class="font-medium">${{ formatCurrency(transaccionSeleccionada.impuestos || 0) }}</span>
+              <div>
+                <span class="text-sm font-medium text-slate-600">Película</span>
+                <p class="text-slate-900">{{ transaccionSeleccionada.pelicula?.titulo }}</p>
               </div>
-              <div class="border-t pt-3">
-                <div class="flex justify-between">
-                  <span class="text-lg font-semibold text-gray-900">Total:</span>
-                  <span class="text-lg font-bold text-green-600">${{ formatCurrency(transaccionSeleccionada.total) }}</span>
-                </div>
+              <div>
+                <span class="text-sm font-medium text-slate-600">Sala</span>
+                <p class="text-slate-900">{{ transaccionSeleccionada.sala?.nombre }}</p>
+              </div>
+              <div>
+                <span class="text-sm font-medium text-slate-600">Fecha</span>
+                <p class="text-slate-900">{{ formatDate(transaccionSeleccionada.fecha) }}</p>
+              </div>
+              <div>
+                <span class="text-sm font-medium text-slate-600">Asientos</span>
+                <p class="text-slate-900">{{ transaccionSeleccionada.asientos?.join(', ') }}</p>
               </div>
             </div>
-
-            <!-- Acciones -->
-            <div class="mt-6 space-y-3">
-              <UButton
-                v-if="transaccionSeleccionada.puede_cancelar"
-                @click="cancelarTransaccion(transaccionSeleccionada.id)"
-                color="red"
-                variant="outline"
-                class="w-full"
-                :loading="cancelando === transaccionSeleccionada.id"
-              >
-                Cancelar Transacción
-              </UButton>
-              <UButton
-                @click="descargarComprobante(transaccionSeleccionada)"
-                color="purple"
-                variant="outline"
-                class="w-full"
-              >
-                Descargar Comprobante
-              </UButton>
+            
+            <div class="border-t border-slate-200 pt-4">
+              <div class="flex justify-between items-center">
+                <span class="text-lg font-semibold text-slate-900">Total</span>
+                <span class="text-2xl font-bold text-slate-900">${{ formatCurrency(transaccionSeleccionada.total) }}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </UModal>
+    </div>
   </div>
 </template>
 
 <script setup>
-// Middleware de autenticación
 definePageMeta({
   middleware: 'auth'
 })
 
 const api = useApi()
+const { currentUser } = useAuth()
 
 // Estado
-const loading = ref(false)
+const loading = ref(true)
 const error = ref(null)
 const transacciones = ref([])
-const transaccionesFiltradas = ref([])
-const paginaActual = ref(1)
-const totalTransacciones = ref(0)
-const totalPaginas = ref(0)
-const limite = 10
-
-// Modal de detalles
-const detallesAbierto = ref(false)
+const filtroEstado = ref('')
+const ordenarPor = ref('fecha_desc')
+const mostrarModal = ref(false)
 const transaccionSeleccionada = ref(null)
-const cancelando = ref(null)
 
-// Filtros
-const filtros = ref({
-  numeroFactura: '',
-  estado: '',
-  metodoPago: ''
+// Computed
+const transaccionesFiltradas = computed(() => {
+  let filtradas = [...transacciones.value]
+  
+  // Filtrar por estado
+  if (filtroEstado.value) {
+    filtradas = filtradas.filter(t => t.estado === filtroEstado.value)
+  }
+  
+  // Ordenar
+  switch (ordenarPor.value) {
+    case 'fecha_desc':
+      filtradas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+      break
+    case 'fecha_asc':
+      filtradas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+      break
+    case 'total_desc':
+      filtradas.sort((a, b) => b.total - a.total)
+      break
+    case 'total_asc':
+      filtradas.sort((a, b) => a.total - b.total)
+      break
+  }
+  
+  return filtradas
 })
 
-const orden = ref('fecha_desc')
-
-// Opciones
-const opcionesEstado = [
-  { label: 'Todos', value: '' },
-  { label: 'Confirmado', value: 'confirmado' },
-  { label: 'Pendiente', value: 'pendiente' },
-  { label: 'Cancelado', value: 'cancelado' },
-  { label: 'Procesando', value: 'procesando' }
-]
-
-const opcionesMetodoPago = [
-  { label: 'Todos', value: '' },
-  { label: 'Tarjeta de Crédito', value: 'tarjeta_credito' },
-  { label: 'Tarjeta de Débito', value: 'tarjeta_debito' },
-  { label: 'Efectivo', value: 'efectivo' },
-  { label: 'Transferencia', value: 'transferencia' },
-  { label: 'Puntos', value: 'puntos' }
-]
-
-const opcionesOrden = [
-  { label: 'Fecha (más reciente)', value: 'fecha_desc' },
-  { label: 'Fecha (más antigua)', value: 'fecha_asc' },
-  { label: 'Total (mayor)', value: 'total_desc' },
-  { label: 'Total (menor)', value: 'total_asc' }
-]
-
-// Cargar transacciones
+// Métodos
 const cargarTransacciones = async () => {
   loading.value = true
   error.value = null
   
   try {
-    const response = await api.getHistorialCompras(limite)
+    const response = await api.getTransaccionesUsuario(20)
     
-    if (response.success && response.data) {
-      transacciones.value = response.data.transacciones || []
-      totalTransacciones.value = response.data.total || 0
-      totalPaginas.value = Math.ceil(totalTransacciones.value / limite)
-      filtrarTransacciones()
+    if (response.success) {
+      // El endpoint devuelve { transacciones: [...], total: number }
+      transacciones.value = response.data?.transacciones || []
+      console.log('Transacciones cargadas:', transacciones.value)
     } else {
-      error.value = response.error || 'Error al cargar las transacciones'
+      error.value = response.error || 'Error al cargar transacciones'
     }
   } catch (err) {
-    error.value = 'Error de conexión'
     console.error('Error cargando transacciones:', err)
+    error.value = 'Error de conexión al cargar transacciones'
   } finally {
     loading.value = false
   }
 }
 
-// Filtrar transacciones
-const filtrarTransacciones = () => {
-  let filtradas = [...transacciones.value]
-  
-  // Filtro por número de factura
-  if (filtros.value.numeroFactura) {
-    filtradas = filtradas.filter(t => 
-      t.numero_factura.toLowerCase().includes(filtros.value.numeroFactura.toLowerCase())
-    )
-  }
-  
-  // Filtro por estado
-  if (filtros.value.estado) {
-    filtradas = filtradas.filter(t => t.estado === filtros.value.estado)
-  }
-  
-  // Filtro por método de pago
-  if (filtros.value.metodoPago) {
-    filtradas = filtradas.filter(t => t.metodo_pago === filtros.value.metodoPago)
-  }
-  
-  transaccionesFiltradas.value = filtradas
-}
-
-// Ordenar transacciones
-const ordenarTransacciones = () => {
-  const ordenadas = [...transaccionesFiltradas.value]
-  
-  switch (orden.value) {
-    case 'fecha_desc':
-      ordenadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-      break
-    case 'fecha_asc':
-      ordenadas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
-      break
-    case 'total_desc':
-      ordenadas.sort((a, b) => b.total - a.total)
-      break
-    case 'total_asc':
-      ordenadas.sort((a, b) => a.total - b.total)
-      break
-  }
-  
-  transaccionesFiltradas.value = ordenadas
-}
-
-// Cambiar página
-const cambiarPagina = (nuevaPagina) => {
-  paginaActual.value = nuevaPagina
-  cargarTransacciones()
-}
-
-// Ver detalles de transacción
-const verDetalles = async (transaccion) => {
+const descargarComprobante = async (transaccion) => {
   try {
-    const response = await api.getDetallesTransaccion(transaccion.id)
-    
-    if (response.success && response.data) {
-      transaccionSeleccionada.value = response.data
-      detallesAbierto.value = true
-    } else {
-      console.error('Error cargando detalles:', response.error)
-    }
+    // Aquí implementarías la lógica para descargar el comprobante
+    console.log('Descargando comprobante para:', transaccion.numero_factura)
+    // Por ahora solo mostramos un alert
+    alert(`Descargando comprobante para ${transaccion.numero_factura}`)
   } catch (err) {
-    console.error('Error cargando detalles:', err)
+    console.error('Error descargando comprobante:', err)
+    alert('Error al descargar el comprobante')
   }
 }
 
-// Cancelar transacción
-const cancelarTransaccion = async (transaccionId) => {
-  if (!confirm('¿Estás seguro de que quieres cancelar esta transacción?')) {
-    return
-  }
-  
-  cancelando.value = transaccionId
-  
-  try {
-    const response = await api.cancelarTransaccion(transaccionId)
-    
-    if (response.success) {
-      // Actualizar la transacción en la lista
-      const index = transacciones.value.findIndex(t => t.id === transaccionId)
-      if (index !== -1) {
-        transacciones.value[index].estado = 'cancelado'
-        filtrarTransacciones()
-      }
-      
-      // Cerrar modal si está abierto
-      if (detallesAbierto.value && transaccionSeleccionada.value?.id === transaccionId) {
-        transaccionSeleccionada.value.estado = 'cancelado'
-      }
-      
-      // Mostrar notificación
-      alert('Transacción cancelada exitosamente')
-    } else {
-      alert('Error al cancelar la transacción: ' + response.error)
-    }
-  } catch (err) {
-    console.error('Error cancelando transacción:', err)
-    alert('Error al cancelar la transacción')
-  } finally {
-    cancelando.value = null
-  }
+const verDetalles = (transaccion) => {
+  transaccionSeleccionada.value = transaccion
+  mostrarModal.value = true
 }
 
-// Descargar comprobante
-const descargarComprobante = (transaccion) => {
-  // Simular descarga de comprobante
-  const contenido = `
-    COMPROBANTE DE COMPRA
-    ====================
-    
-    Número de Factura: ${transaccion.numero_factura}
-    ID de Transacción: ${transaccion.id}
-    Fecha: ${formatDateTime(transaccion.fecha_creacion || transaccion.fecha)}
-    Estado: ${getEstadoText(transaccion.estado)}
-    
-    Asientos: ${transaccion.asientos.join(', ')}
-    Total: $${formatCurrency(transaccion.total)}
-    Método de Pago: ${getMetodoPagoText(transaccion.metodo_pago)}
-    
-    Gracias por su compra!
-  `
-  
-  const blob = new Blob([contenido], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `comprobante-${transaccion.numero_factura}.txt`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
-
-// Funciones helper
 const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
-
-const formatDateTime = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('es-ES', {
+  if (!dateString) return 'N/A'
+  return new Date(dateString).toLocaleDateString('es-CO', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -544,57 +325,13 @@ const formatDateTime = (dateString) => {
 }
 
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('es-CO').format(amount)
+  return new Intl.NumberFormat('es-CO', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount)
 }
 
-const getEstadoColor = (estado) => {
-  switch (estado) {
-    case 'confirmado': return 'green'
-    case 'pendiente': return 'yellow'
-    case 'cancelado': return 'red'
-    case 'procesando': return 'blue'
-    default: return 'gray'
-  }
-}
-
-const getEstadoText = (estado) => {
-  switch (estado) {
-    case 'confirmado': return 'Confirmado'
-    case 'pendiente': return 'Pendiente'
-    case 'cancelado': return 'Cancelado'
-    case 'procesando': return 'Procesando'
-    default: return estado
-  }
-}
-
-const getMetodoPagoText = (metodo) => {
-  switch (metodo) {
-    case 'tarjeta_credito': return 'Tarjeta de Crédito'
-    case 'tarjeta_debito': return 'Tarjeta de Débito'
-    case 'efectivo': return 'Efectivo'
-    case 'transferencia': return 'Transferencia'
-    case 'puntos': return 'Puntos'
-    default: return metodo
-  }
-}
-
-const getMetodoPagoIcon = (metodo) => {
-  switch (metodo) {
-    case 'tarjeta_credito':
-    case 'tarjeta_debito':
-      return 'heroicons:credit-card'
-    case 'efectivo':
-      return 'heroicons:banknotes'
-    case 'transferencia':
-      return 'heroicons:arrow-path'
-    case 'puntos':
-      return 'heroicons:gift'
-    default:
-      return 'heroicons:credit-card'
-  }
-}
-
-// Cargar datos al montar el componente
+// Cargar transacciones al montar
 onMounted(() => {
   cargarTransacciones()
 })

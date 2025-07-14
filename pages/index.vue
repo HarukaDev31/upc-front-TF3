@@ -1,167 +1,112 @@
 <template>
-  <div>
+  <div class="min-h-screen bg-slate-50">
     <!-- Hero Section -->
-    <section class="relative h-[600px] flex items-center justify-center overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-purple-900/80 z-10"></div>
-      <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
-      
-      <div class="relative z-20 text-center text-white px-4">
-        <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-          Bienvenido a Cinemax
-        </h1>
-        <p class="text-xl md:text-2xl mb-8 text-gray-200 max-w-3xl mx-auto">
-          Descubre las mejores películas en la experiencia cinematográfica más avanzada
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <UButton 
-            to="/peliculas" 
-            size="lg" 
-            color="purple"
-            class="text-lg px-8 py-4"
-          >
-            Ver Películas
-          </UButton>
-          <UButton 
-            to="/peliculas" 
-            size="lg" 
-            variant="outline"
-            class="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-gray-900"
-          >
-            Ver Cartelera
-          </UButton>
+    <section class="bg-white border-b border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-slate-900 mb-4">
+            Bienvenido a CINEMAX
+          </h1>
+          <p class="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+            Descubre las mejores películas en la cartelera más actualizada. 
+            Reserva tus asientos y disfruta de una experiencia cinematográfica única.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <NuxtLink 
+              to="/peliculas" 
+              class="bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors"
+            >
+              Ver Películas
+            </NuxtLink>
+            <NuxtLink 
+              to="/metricas" 
+              class="border border-slate-300 text-slate-700 px-6 py-3 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+            >
+              Ver Métricas
+            </NuxtLink>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Películas Destacadas -->
-    <section class="py-16 bg-gray-50">
-      <div class="container mx-auto px-4">
+    <!-- Features Section -->
+    <section class="py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">Películas Destacadas</h2>
-          <p class="text-xl text-gray-600">Las mejores películas que no te puedes perder</p>
-        </div>
-
-        <div v-if="loading" class="flex justify-center py-12">
-          <UIcon name="heroicons:arrow-path" class="w-8 h-8 animate-spin text-purple-500" />
-        </div>
-
-        <div v-else-if="error" class="text-center py-12">
-          <UIcon name="heroicons:exclamation-triangle" class="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p class="text-red-600">{{ error }}</p>
-        </div>
-
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          <div 
-            v-for="pelicula in peliculasDestacadas" 
-            :key="pelicula._id"
-            class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
-          >
-            <div class="relative">
-              <img 
-                :src="pelicula.poster_url || 'https://via.placeholder.com/300x450/1f2937/ffffff?text=Sin+Imagen'" 
-                :alt="pelicula.titulo"
-                class="w-full h-80 object-cover"
-              />
-              <div class="absolute top-4 right-4 bg-purple-500 text-white px-2 py-1 rounded-full text-sm font-semibold">
-                {{ pelicula.rating || '10' }}/10
-              </div>
-            </div>
-            
-            <div class="p-6">
-              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ pelicula.titulo }}</h3>
-              <p class="text-gray-600 mb-4 line-clamp-2">{{ pelicula.sinopsis || 'Sin descripción disponible' }}</p>
-              
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-sm text-gray-500 bg-purple-100 px-2 py-1 rounded-full" v-for="genero in pelicula.generos" :key="genero">{{ genero }}</span>
-                <span class="text-sm text-gray-500">{{ pelicula.duracion_minutos || 'N/A' }} min</span>
-              </div>
-              
-              <UButton 
-                :to="`/peliculas/${pelicula._id}`"
-                color="purple"
-                class="w-full"
-              >
-                Ver Detalles
-              </UButton>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Estadísticas -->
-    <section class="py-16 bg-gradient-to-r from-purple-600 to-pink-600">
-      <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center text-white">
-          <div>
-            <div class="text-4xl font-bold mb-2">{{ estadisticas.peliculas }}</div>
-            <p class="text-purple-100">Películas Disponibles</p>
-          </div>
-          <div>
-            <div class="text-4xl font-bold mb-2">{{ estadisticas.funciones }}</div>
-            <p class="text-purple-100">Funciones Hoy</p>
-          </div>
-          <div>
-            <div class="text-4xl font-bold mb-2">{{ estadisticas.salas }}</div>
-            <p class="text-purple-100">Salas de Cine</p>
-          </div>
-          <div>
-            <div class="text-4xl font-bold mb-2">{{ estadisticas.clientes }}</div>
-            <p class="text-purple-100">Clientes Satisfechos</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Características -->
-    <section class="py-16 bg-white">
-      <div class="container mx-auto px-4">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-900 mb-4">¿Por qué elegir Cinemax?</h2>
-          <p class="text-xl text-gray-600">Descubre lo que nos hace únicos</p>
+          <h2 class="text-3xl font-bold text-slate-900 mb-4">
+            ¿Por qué elegir CINEMAX?
+          </h2>
+          <p class="text-slate-600 max-w-2xl mx-auto">
+            Ofrecemos la mejor experiencia cinematográfica con tecnología de vanguardia y el confort que mereces.
+          </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="text-center">
-            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UIcon name="heroicons:film" class="w-8 h-8 text-purple-600" />
+          <!-- Feature 1 -->
+          <div class="bg-white p-6 rounded-lg border border-slate-200">
+            <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2"></path>
+              </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Tecnología de Vanguardia</h3>
-            <p class="text-gray-600">Salas equipadas con la última tecnología en sonido e imagen para una experiencia inmersiva.</p>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">
+              Cartelera Actualizada
+            </h3>
+            <p class="text-slate-600">
+              Las últimas películas y estrenos disponibles en nuestra plataforma.
+            </p>
           </div>
-          
-          <div class="text-center">
-            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UIcon name="heroicons:clock" class="w-8 h-8 text-purple-600" />
+
+          <!-- Feature 2 -->
+          <div class="bg-white p-6 rounded-lg border border-slate-200">
+            <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Reservas Online</h3>
-            <p class="text-gray-600">Reserva tus entradas desde cualquier dispositivo, 24/7, sin filas ni esperas.</p>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">
+              Reserva Fácil
+            </h3>
+            <p class="text-slate-600">
+              Selecciona tus asientos favoritos de manera rápida y sencilla.
+            </p>
           </div>
-          
-          <div class="text-center">
-            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UIcon name="heroicons:star" class="w-8 h-8 text-purple-600" />
+
+          <!-- Feature 3 -->
+          <div class="bg-white p-6 rounded-lg border border-slate-200">
+            <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-4">
+              <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">Mejor Selección</h3>
-            <p class="text-gray-600">Las mejores películas nacionales e internacionales, estrenos y clásicos.</p>
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">
+              Métricas en Tiempo Real
+            </h3>
+            <p class="text-slate-600">
+              Visualiza estadísticas detalladas de ocupación y rendimiento.
+            </p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="py-16 bg-gray-900">
-      <div class="container mx-auto px-4 text-center">
-        <h2 class="text-4xl font-bold text-white mb-4">¿Listo para tu próxima aventura?</h2>
-        <p class="text-xl text-gray-300 mb-8">Explora nuestra cartelera y reserva tus entradas ahora</p>
-        <UButton 
-          to="/peliculas" 
-          size="lg" 
-          color="purple"
-          class="text-lg px-8 py-4"
-        >
-          Ver Cartelera Completa
-        </UButton>
+    <section class="bg-white border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center">
+          <h2 class="text-3xl font-bold text-slate-900 mb-4">
+            ¿Listo para comenzar?
+          </h2>
+          <p class="text-slate-600 mb-8 max-w-2xl mx-auto">
+            Explora nuestra cartelera y encuentra la película perfecta para tu próxima visita al cine.
+          </p>
+          <NuxtLink 
+            to="/peliculas" 
+            class="bg-slate-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors"
+          >
+            Explorar Películas
+          </NuxtLink>
+        </div>
       </div>
     </section>
   </div>

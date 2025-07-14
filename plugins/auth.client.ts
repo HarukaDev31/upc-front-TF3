@@ -7,18 +7,44 @@ export default defineNuxtPlugin(() => {
       return
     }
     
-    // Esperar a que la aplicación esté completamente inicializada
-    setTimeout(() => {
+    // Función para inicializar la autenticación
+    const initializeAuth = async () => {
       try {
         const { checkAuth } = useAuth()
         
         // Verificar autenticación al cargar la aplicación
-        checkAuth().catch(error => {
-          console.error('Error en plugin de autenticación:', error)
-        })
+        await checkAuth()
+        console.log('Plugin Auth: Autenticación verificada correctamente')
       } catch (error) {
-        console.error('Error inicializando plugin de autenticación:', error)
+        console.error('Error en plugin de autenticación:', error)
       }
-    }, 500) // Esperar 500ms para asegurar que todo esté inicializado
+    }
+    
+    // Esperar a que la aplicación esté completamente inicializada
+    // Usar requestIdleCallback si está disponible, sino setTimeout
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(() => {
+        initializeAuth()
+      })
+    } else {
+      // Fallback para navegadores que no soportan requestIdleCallback
+      setTimeout(() => {
+        initializeAuth()
+      }, 100)
+    }
+    
+    // También verificar cuando la página esté completamente cargada
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          initializeAuth()
+        }, 50)
+      })
+    } else {
+      // Si ya está cargado, ejecutar inmediatamente
+      setTimeout(() => {
+        initializeAuth()
+      }, 50)
+    }
   }
 }) 

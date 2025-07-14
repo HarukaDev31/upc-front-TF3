@@ -1,140 +1,104 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
-    <div class="max-w-md w-full space-y-8">
-      <!-- Logo y título -->
-      <div class="text-center">
-        <div class="mx-auto h-16 w-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
-          <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-          </svg>
-        </div>
-        <h2 class="text-3xl font-bold text-white mb-2">Crear Cuenta</h2>
-        <p class="text-gray-300">Únete a nuestra comunidad de cine</p>
+  <div>
+    <div class="text-center mb-8">
+      <h1 class="text-2xl font-bold text-slate-900 mb-2">Crear Cuenta</h1>
+      <p class="text-slate-600">Únete a CINEMAX</p>
+    </div>
+
+    <form @submit.prevent="handleRegister" class="space-y-6">
+      <!-- Name -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-slate-700 mb-2">
+          Nombre Completo
+        </label>
+        <input
+          id="name"
+          v-model="form.nombre"
+          type="text"
+          required
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+          placeholder="Tu nombre completo"
+        />
       </div>
 
-      <!-- Formulario -->
-      <form @submit.prevent="handleRegister" class="mt-8 space-y-6">
-        <!-- Nombre -->
-        <div>
-          <label for="nombre" class="block text-sm font-medium text-gray-300 mb-2">
-            Nombre
-          </label>
-          <input
-            id="nombre"
-            v-model="form.nombre"
-            type="text"
-            required
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-            placeholder="Tu nombre"
-          />
-        </div>
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-slate-700 mb-2">
+          Correo Electrónico
+        </label>
+        <input
+          id="email"
+          v-model="form.email"
+          type="email"
+          required
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+          placeholder="tu@email.com"
+        />
+      </div>
 
-        <!-- Apellido -->
-        <div>
-          <label for="apellido" class="block text-sm font-medium text-gray-300 mb-2">
-            Apellido
-          </label>
-          <input
-            id="apellido"
-            v-model="form.apellido"
-            type="text"
-            required
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-            placeholder="Tu apellido"
-          />
-        </div>
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-sm font-medium text-slate-700 mb-2">
+          Contraseña
+        </label>
+        <input
+          id="password"
+          v-model="form.password"
+          type="password"
+          required
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+          placeholder="••••••••"
+        />
+      </div>
 
-        <!-- Email -->
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
-            Correo Electrónico
-          </label>
-          <input
-            id="email"
-            v-model="form.email"
-            type="email"
-            required
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-            placeholder="tu@email.com"
-          />
-        </div>
+      <!-- Confirm Password -->
+      <div>
+        <label for="confirmPassword" class="block text-sm font-medium text-slate-700 mb-2">
+          Confirmar Contraseña
+        </label>
+        <input
+          id="confirmPassword"
+          v-model="form.confirmPassword"
+          type="password"
+          required
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+          placeholder="••••••••"
+        />
+      </div>
 
-        <!-- Teléfono -->
-        <div>
-          <label for="telefono" class="block text-sm font-medium text-gray-300 mb-2">
-            Teléfono
-          </label>
-          <input
-            id="telefono"
-            v-model="form.telefono"
-            type="tel"
-            required
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-            placeholder="123456789"
-          />
+      <!-- Error Message -->
+      <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-center space-x-3">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-red-700 text-sm">{{ error }}</span>
         </div>
+      </div>
 
-        <!-- Password -->
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
-            Contraseña
-          </label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            required
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-            placeholder="••••••••"
-          />
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        :disabled="loading"
+        class="w-full bg-slate-900 text-white py-2 px-4 rounded-lg font-medium hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        <div v-if="loading" class="flex items-center justify-center space-x-2">
+          <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          <span>Creando cuenta...</span>
         </div>
+        <span v-else>Crear Cuenta</span>
+      </button>
 
-        <!-- Confirm Password -->
-        <div>
-          <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-2">
-            Confirmar Contraseña
-          </label>
-          <input
-            id="confirmPassword"
-            v-model="form.confirmPassword"
-            type="password"
-            required
-            class="appearance-none relative block w-full px-3 py-3 border border-gray-600 placeholder-gray-400 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-            placeholder="••••••••"
-          />
-        </div>
-
-        <!-- Error Message -->
-        <div v-if="error" class="bg-red-500/20 border border-red-500/50 rounded-lg p-3">
-          <p class="text-red-300 text-sm">{{ error }}</p>
-        </div>
-
-        <!-- Submit Button -->
-        <button
-          type="submit"
-          :disabled="loading || !isFormValid"
-          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          <span v-if="loading" class="absolute left-0 inset-y-0 flex items-center pl-3">
-            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </span>
-          {{ loading ? 'Creando cuenta...' : 'Crear Cuenta' }}
-        </button>
-
-        <!-- Login Link -->
-        <div class="text-center">
-          <p class="text-gray-300 text-sm">
-            ¿Ya tienes cuenta?
-            <NuxtLink to="/auth/login" class="font-medium text-purple-400 hover:text-purple-300 transition-colors duration-200">
-              Inicia sesión aquí
-            </NuxtLink>
-          </p>
-        </div>
-      </form>
-    </div>
+      <!-- Login Link -->
+      <div class="text-center">
+        <p class="text-sm text-slate-600">
+          ¿Ya tienes una cuenta?
+          <NuxtLink to="/auth/login" class="text-slate-900 font-medium hover:underline">
+            Inicia sesión aquí
+          </NuxtLink>
+        </p>
+      </div>
+    </form>
   </div>
 </template>
 
@@ -150,9 +114,7 @@ const route = useRoute()
 
 const form = ref({
   nombre: '',
-  apellido: '',
   email: '',
-  telefono: '',
   password: '',
   confirmPassword: ''
 })
@@ -171,9 +133,7 @@ onMounted(() => {
 // Validación del formulario
 const isFormValid = computed(() => {
   return form.value.nombre && 
-         form.value.apellido && 
          form.value.email && 
-         form.value.telefono && 
          form.value.password && 
          form.value.confirmPassword &&
          form.value.password === form.value.confirmPassword
@@ -186,12 +146,10 @@ const handleRegister = async () => {
     return
   }
 
-  console.log('Attempting register...')
+  console.log('Attempting register with:', form.value)
   const success = await register({
     email: form.value.email,
     nombre: form.value.nombre,
-    apellido: form.value.apellido,
-    telefono: form.value.telefono,
     password: form.value.password
   })
 

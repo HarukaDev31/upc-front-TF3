@@ -231,6 +231,10 @@ export const useApi = () => {
   const getHistorialCompras = (limite = 20) => 
     authenticatedRequest(`/api/v1/transacciones/historial?limit=${limite}`)
 
+  // Obtener transacciones del usuario actual
+  const getTransaccionesUsuario = (limite = 20) => 
+    authenticatedRequest(`/api/v1/transacciones/historial?limit=${limite}`)
+
   // Cancelar transacción
   const cancelarTransaccion = (transaccionId: string) => 
     authenticatedRequest(`/api/v1/transacciones/${transaccionId}/cancelar`, {
@@ -296,6 +300,7 @@ export const useApi = () => {
     // ===== GESTIÓN DE TRANSACCIONES =====
     comprarEntradaTransaccion,
     getHistorialCompras,
+    getTransaccionesUsuario,
     cancelarTransaccion,
     getDetallesTransaccion,
     getAsientosOcupados,

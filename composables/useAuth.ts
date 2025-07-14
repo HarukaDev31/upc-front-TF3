@@ -91,6 +91,14 @@ export const useAuth = () => {
           logout()
           return false
         }
+      } else {
+        // No hay token o usuario, pero verificar si hay datos en localStorage
+        if (storedUser) {
+          user.value = storedUser
+          isAuthenticated.value = true
+          console.log('checkAuth - Usuario cargado desde localStorage')
+          return true
+        }
       }
     }
     
@@ -256,19 +264,12 @@ export const useAuth = () => {
 
   // Inicializar autenticación al cargar (solo en cliente)
   if (process.client) {
-    // Solo llamar onMounted si estamos en el contexto de un componente
-    try {
-      onMounted(async () => {
-        try {
-          await checkAuth()
-        } catch (error) {
-          console.error('Error inicializando autenticación:', error)
-        }
-      })
-    } catch (e) {
-      // Si onMounted falla, significa que no estamos en el contexto de un componente
-      // En este caso, no hacer nada para evitar errores de inicialización
-      console.log('useAuth: No se pudo inicializar onMounted, saltando inicialización automática')
+    // Inicializar inmediatamente si hay datos en localStorage
+    const storedUser = getUserFromStorage()
+    if (storedUser) {
+      user.value = storedUser
+      isAuthenticated.value = true
+      console.log('useAuth: Usuario cargado desde localStorage')
     }
   }
 
