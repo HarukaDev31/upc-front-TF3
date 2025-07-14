@@ -118,18 +118,11 @@
                   <UButton 
                     :to="`/peliculas/${pelicula._id}`"
                     color="purple"
-                    variant="outline"
-                    class="flex-1"
-                  >
-                    Detalles
-                  </UButton>
-                  <UButton 
-                    :to="`/peliculas/${pelicula._id}/funciones`"
-                    color="purple"
                     class="flex-1"
                   >
                     Comprar
                   </UButton>
+                 
                 </div>
               </div>
             </div>
@@ -238,11 +231,11 @@ const buscarPeliculas = async () => {
       limite: limite
     })
     
-      if (response.data.peliculas) {
-      peliculas.value = response.data.peliculas
-      totalPeliculas.value = response.data.peliculas.length
+      if (response.data.resultados) {
+      peliculas.value = response.data.resultados
+      totalPeliculas.value = response.data.resultados.length
       totalPaginas.value = 1
-      setPeliculas(response.data.peliculas)
+      setPeliculas(response.data.resultados)
     } else {
       error.value = response.error || 'Error en la búsqueda'
     }

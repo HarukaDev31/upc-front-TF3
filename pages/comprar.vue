@@ -553,7 +553,7 @@ const descargarComprobante = async () => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Boleta de Compra - CINEMA UPC</title>
+        <title>Boleta de Compra - CINEMAX</title>
         <meta charset="UTF-8">
         <style>
           body { 
@@ -800,7 +800,7 @@ const descargarComprobante = async () => {
             <p>• No se permiten cambios ni devoluciones</p>
             <p>• Los asientos se liberan 5 minutos antes</p>
             <p style="margin-top: 20px; font-size: 0.8em; color: #999;">
-              CINEMA UPC - Sistema de Gestión de Entradas<br>
+              CINEMAX - Sistema de Gestión de Entradas<br>
               ${new Date().toLocaleDateString('es-CO')}
             </p>
           </div>

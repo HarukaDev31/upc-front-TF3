@@ -186,7 +186,7 @@ export const useApi = () => {
     apiRequest(`/api/v1/peliculas/${peliculaId}/funciones`)
 
   const buscarPeliculas = (busqueda: any) => 
-    apiRequest('/api/v1/buscar-peliculas', {
+    apiRequest('/api/v1/peliculas/buscar', {
       method: 'POST',
       body: busqueda
     })
@@ -208,6 +208,15 @@ export const useApi = () => {
 
   const getOcupacionSala = (funcionId: string) => 
     apiRequest(`/api/v1/metricas/ocupacion/${funcionId}`)
+
+  const getOcupacionSalas = () => 
+    apiRequest('/api/v1/metricas/ocupacion-salas/todas')
+
+  const getGenerosPopulares = () => 
+    apiRequest('/api/v1/metricas/generos-populares')
+
+  const getHorariosPico = () => 
+    apiRequest('/api/v1/metricas/horarios-pico')
 
   // ===== GESTIÓN DE TRANSACCIONES =====
   
@@ -280,6 +289,9 @@ export const useApi = () => {
     // Métricas
     getRankingPeliculas,
     getOcupacionSala,
+    getOcupacionSalas,
+    getGenerosPopulares,
+    getHorariosPico,
 
     // ===== GESTIÓN DE TRANSACCIONES =====
     comprarEntradaTransaccion,

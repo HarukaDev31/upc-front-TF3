@@ -19,12 +19,6 @@
               Películas
             </NuxtLink>
             <NuxtLink 
-              to="/funciones" 
-              class="text-gray-600 hover:text-purple-600 transition-colors"
-            >
-              Funciones
-            </NuxtLink>
-            <NuxtLink 
               to="/metricas" 
               class="text-gray-600 hover:text-purple-600 transition-colors"
             >
